@@ -1,0 +1,1167 @@
+unit UIntHandler;
+
+interface
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics,
+  Controls, Forms, Dialogs, StdCtrls, Math,
+  RList, GLWdef, VisualOverlayClass, GraphicLayerManager,
+  GLMFunctionality, VectorObjectTrigonometry;
+
+
+
+
+
+Type TUserInteractionHandler = class(TObject)
+private
+  RemoteGLM         : TGraphicLayerManager;
+  Surface           : TVisualOverlay;
+  Group             : TVectorObjectGroup;
+  GroupID           : int64;
+  GroupIdx          : longint; // use this only after existence has been reassured
+  HasGroup          : Boolean;
+  VectorObj         : TVectorObject;
+  VectorObjID       : int64;
+  HasObject         : Boolean;
+  Selection         : TMetaData;
+  RefreshRequest    : TNotifyEvent;
+  ConnectionIsValid : Boolean;
+  InAction          : Boolean;
+  IsConnected       : Boolean;
+  _RequiresHandlerDraw : Boolean;
+  LastShiftState    : TShiftState;
+
+public
+  OnDisconnect      : TNotifyEvent;
+  AllowSubpixelCoordinates : Boolean;
+
+  property RequiresHandlerDraw : Boolean read _RequiresHandlerDraw;
+  property Connected: Boolean read IsConnected;
+
+  procedure HandlerPaintEvent( Destination: TBitmap;
+                               AbsoluteOrigin: TPoint;
+                               CurrentScaling: single); virtual;
+
+  procedure Connect( GLM                   : TGraphicLayerManager;
+                     VOSurface             : TVisualOverlay;
+                     CurrentGroup          : TVectorObjectGroup;
+                     CurrentObject         : TVectorObject;
+                     CurrentSelection      : TMetaData;
+                     RefreshRequestHandler : TNotifyEvent); virtual;
+
+  procedure Disconnect;
+
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); virtual; abstract;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); virtual; abstract;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); virtual; abstract;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+                      Shift: TShiftState; MousePos: TPoint): Boolean; virtual; abstract;
+  procedure VectorObjectsChanged(Sender: TObject); virtual; abstract;
+end;
+
+
+
+Type TMoveObjectsHandler = class(TUserInteractionHandler)
+private
+  AbsoluteStartPoint : TFloatPoint;
+  StartPoint: TFloatPoint;
+
+  LocalTextHint: String;
+  LocalTextPos: TPoint;
+
+public
+  OnRightclickOneObject: TNotifyEvent;
+
+  procedure HandlerPaintEvent( Destination: TBitmap;
+                               AbsoluteOrigin: TPoint;
+                               CurrentScaling: single); override;
+
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+                      Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  procedure VectorObjectsChanged(Sender: TObject); override;
+end;
+
+
+
+Type TCreatePointHandler = class(TUserInteractionHandler)
+  constructor Create;  virtual;
+  destructor Destroy; override;
+
+private
+  MoveHandler : TMoveObjectsHandler;
+  NewlyCreated: TMetaData;
+
+public
+  MovePointsInProximity: Boolean;
+
+  procedure Connect( GLM                   : TGraphicLayerManager;
+                     VOSurface             : TVisualOverlay;
+                     CurrentGroup          : TVectorObjectGroup;
+                     CurrentObject         : TVectorObject;
+                     CurrentSelection      : TMetaData;
+                     RefreshRequestHandler : TNotifyEvent); override;
+
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+                      Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  procedure VectorObjectsChanged(Sender: TObject); override;
+end;
+
+
+
+Type TAssemblePolygonHandler = class(TUserInteractionHandler)
+  constructor Create;  virtual;
+  destructor Destroy; override;
+
+private
+  PolygonWasEmpty: Boolean; //
+  FirstPointRefIndex: longint;
+
+  LocalTextHint: String;
+  LocalTextPos: TPoint;
+
+  procedure IncludePoint(pt: TSinglePoint);
+  procedure CheckForPoints(ScreenPos: TPoint);
+public
+  AutoSelectNext : Boolean;
+
+  procedure HandlerPaintEvent( Destination: TBitmap;
+                               AbsoluteOrigin: TPoint;
+                               CurrentScaling: single); override;
+
+  procedure Connect( GLM                   : TGraphicLayerManager;
+                     VOSurface             : TVisualOverlay;
+                     CurrentGroup          : TVectorObjectGroup;
+                     CurrentObject         : TVectorObject;
+                     CurrentSelection      : TMetaData;
+                     RefreshRequestHandler : TNotifyEvent); override;
+
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+              Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  procedure VectorObjectsChanged(Sender: TObject); override;
+end;
+
+
+
+Type TDeleteObjectsHandler = class(TUserInteractionHandler)
+public
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+                      Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  procedure VectorObjectsChanged(Sender: TObject); override;
+end;
+
+
+                                                
+
+Type TMarqueeHandler = class(TUserInteractionHandler)
+private
+  GlobalStartPoint: TFloatPoint;
+  GlobalEndPoint  : TFloatPoint;
+
+  SelectionRect: TFloatRect;
+
+  OldScreenRect : TRect;
+  NewScreenRect : TRect;
+
+  parent: TForm;
+public
+  procedure ReRenderSelection(Obj : TObject);
+
+  procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseMove(Sender: TObject;
+                      Shift: TShiftState; X, Y: Integer); override;
+  procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                      Shift: TShiftState; X, Y: Integer); override;
+  function SurfaceHandlesEvents(Button: TMouseButton;
+                      Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  procedure VectorObjectsChanged(Sender: TObject); override;
+end;
+
+
+
+implementation
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TUserInteractionHandler
+
+
+
+procedure TUserInteractionHandler.Connect(
+                       GLM                   : TGraphicLayerManager;
+                       VOSurface             : TVisualOverlay;
+                       CurrentGroup          : TVectorObjectGroup;
+                       CurrentObject         : TVectorObject;
+                       CurrentSelection      : TMetaData;
+                       RefreshRequestHandler : TNotifyEvent);
+begin
+  Group          := CurrentGroup;
+  if assigned(Group)     then GroupID      := CurrentGroup.UID
+                         else GroupID      := -1;
+  VectorObj      := CurrentObject;
+  if assigned(VectorObj) then VectorObjID  := CurrentObject.UID
+                         else VectorObjID  := -1;
+  RemoteGLM      := GLM;
+  Surface        := VOSurface;
+  Selection      := CurrentSelection;
+  RefreshRequest := RefreshRequestHandler;
+
+  ConnectionIsValid := assigned(RemoteGLM) and assigned(Surface);
+  IsConnected    := True;
+end;
+
+
+
+procedure TUserInteractionHandler.Disconnect;
+begin
+  ConnectionIsValid := False;
+  IsConnected := False;
+  InAction    := False;
+
+  if assigned(OnDisconnect) then
+    OnDisconnect(Self);
+end;
+
+
+
+procedure TUserInteractionHandler.HandlerPaintEvent( Destination: TBitmap;
+                             AbsoluteOrigin: TPoint;
+                             CurrentScaling: single);
+begin
+  // non-abstract virtual method, implement on demand.
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TCreatePointHandler
+
+
+
+constructor TCreatePointHandler.Create;
+begin
+  inherited;
+
+  MoveHandler  := TMoveObjectsHandler.Create;
+  NewlyCreated := TMetaData.Create;
+  InAction     := False;
+  IsConnected  := False;
+end;
+
+
+
+destructor TCreatePointHandler.Destroy;
+begin
+  MoveHandler.Destroy;
+  NewlyCreated.Destroy;
+
+  inherited;
+end;
+
+
+
+procedure TCreatePointHandler.Connect(
+                       GLM                   : TGraphicLayerManager;
+                       VOSurface             : TVisualOverlay;
+                       CurrentGroup          : TVectorObjectGroup;
+                       CurrentObject         : TVectorObject;
+                       CurrentSelection      : TMetaData;
+                       RefreshRequestHandler : TNotifyEvent);
+begin
+  inherited;
+  ConnectionIsValid := ConnectionIsValid and assigned(Group);
+end;
+
+
+
+function TCreatePointHandler.SurfaceHandlesEvents( Button   : TMouseButton;
+                                                   Shift    : TShiftState;
+                                                   MousePos : TPoint ): Boolean;
+var
+  GlobalPos: TPoint;
+  idx: longint;
+  OnePoint: TSinglePoint;
+
+  function PointInProximity(testpoint: TPoint): Boolean;
+  begin
+    result:= ( abs(TestPoint.X-MousePos.X)+
+               abs(TestPoint.Y-MousePos.Y)  ) < 9; {ceil(radius*1.41..};
+  end;
+
+begin
+  result := ConnectionIsValid and (ssLeft in Shift);
+
+  if RemoteGLM.PointGroupList.IndexByID(GroupID) = INDEX_NOT_RESOLVED then
+  begin
+    self.Group := nil;
+    self.Disconnect;
+    result := false;
+    exit;
+  end;
+
+  if ConnectionIsValid then
+  if ssRight in Shift then
+  begin
+    setlength(NewlyCreated.Entries, 0);
+    GlobalPos := RemoteGLM.ScreenToGlobalCoord(MousePos);
+
+    for idx := 0 to RemoteGLM.PointList.Count - 1 do
+    begin
+      OnePoint := RemoteGLM.PointList.Items[idx].Obj as TSinglePoint;
+      if PointInProximity(Point(RemoteGLM.GlobalCoordToScreen(FloatPoint(OnePoint.X,OnePoint.Y)))) then
+      begin
+        NewlyCreated.Add(OnePoint);
+        if not MovePointsInProximity then break;
+      end;
+    end;
+    
+    if NewlyCreated.Count <> 0 then
+      result := true;
+  end;
+
+end;
+
+
+
+procedure TCreatePointHandler.MouseDown( Sender : TObject;
+                                         Button : TMouseButton;
+                                         Shift  : TShiftState;
+                                         X, Y   : Integer);
+var
+  OnePoint: TSinglePoint;
+  GlobalPos: TFloatPoint;
+begin
+  if (not ConnectionIsValid) or InAction then exit;
+
+  if RemoteGLM.PointGroupList.IndexByID(GroupID) = INDEX_NOT_RESOLVED then
+  begin
+    self.Group := nil;
+    self.Disconnect;
+    exit;
+  end;
+
+  if ssLeft in Shift then
+  begin
+    SetLength(NewlyCreated.Entries, 0);
+    OnePoint   := TSinglePoint.Create;
+    GlobalPos  := RemoteGLM.ScreenToGlobalCoord(FloatPoint(X,Y));
+
+    if AllowSubpixelCoordinates then
+    begin
+      OnePoint.X := GlobalPos.X;
+      OnePoint.Y := GlobalPos.Y;
+    end
+    else
+    begin
+      OnePoint.Point := Point(GlobalPos);
+    end;
+
+    NewlyCreated.Add(OnePoint);
+    Group.Add(OnePoint);
+
+    if assigned(RefreshRequest) then RefreshRequest(self);
+  end;
+
+  if NewlyCreated.Count = 0 then
+    exit
+  else
+    InAction   := True;
+
+
+  MoveHandler.Connect(   RemoteGLM,
+                         Surface,
+                         Group,
+                         nil,
+                         NewlyCreated,
+                         RefreshRequest );
+
+  MoveHandler.AllowSubpixelCoordinates :=
+         self.AllowSubpixelCoordinates;
+
+  MoveHandler.MouseDown( Sender,
+                         Button,
+                         Shift,
+                         X, Y );
+end;
+
+
+
+procedure TCreatePointHandler.MouseMove(  Sender : TObject;
+                                          Shift  : TShiftState;
+                                          X, Y   : Integer);
+begin
+  if InAction then
+    MoveHandler.MouseMove(Sender,[ssLeft],X,Y);
+end;
+
+
+
+procedure TCreatePointHandler.MouseUp( Sender : TObject;
+                                       Button : TMouseButton;
+                                       Shift  : TShiftState;
+                                       X, Y   : Integer);
+begin
+  if not assigned(MoveHandler) then begin InAction := False; exit; end;
+  if not assigned(RemoteGLM)   then begin InAction := False; exit; end;
+
+
+  if InAction then
+  begin
+    MoveHandler.MouseUp(Sender,Button,[ssLeft],X,Y);
+    RemoteGLM.RecreateMetaContentLists(self);
+  end;
+
+  InAction := False;
+  MoveHandler.Disconnect;
+end;
+
+
+
+procedure TCreatePointHandler.VectorObjectsChanged(Sender: TObject);
+begin
+  if assigned(RemoteGLM) and
+     self.ConnectionIsValid and
+     (GroupID > -1) then
+  begin
+     if (RemoteGLM.PointGroupList.IndexByID(GroupID) = INDEX_NOT_RESOLVED) then
+       Self.Disconnect;
+  end;
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TMoveObjectsHandler
+
+
+
+procedure TMoveObjectsHandler.VectorObjectsChanged(Sender: TObject);
+begin
+  if assigned(RemoteGLM) and self.ConnectionIsValid then
+  begin
+    if GroupID > -1 then
+     if (RemoteGLM.PointGroupList.  IndexByID(GroupID) = INDEX_NOT_RESOLVED) and
+        (RemoteGLM.PolygonGroupList.IndexByID(GroupID) = INDEX_NOT_RESOLVED) then
+       Self.Disconnect;
+  end;
+end;
+
+
+
+procedure TMoveObjectsHandler.MouseDown( Sender : TObject;
+                                         Button : TMouseButton;
+                                         Shift  : TShiftState;
+                                         X, Y   : Integer);
+begin
+  LastShiftState := Shift;
+  
+  if InAction then
+  begin
+    InAction := False;
+    exit;
+  end;
+
+  StartPoint := RemoteGLM.ScreenToGlobalCoord(FloatPoint(X,Y));
+  AbsoluteStartPoint := StartPoint;
+  
+  InAction   := assigned(Selection);
+  if InAction then
+    InAction := InAction and (Selection.Count > 0);
+end;
+
+
+
+procedure TMoveObjectsHandler.MouseMove( Sender : TObject;
+                                         Shift  : TShiftState;
+                                         X, Y   : Integer);
+var
+  idx : longint;
+  delta: TFloatPoint;
+  OnePoint: TSinglePoint;
+  GlobalPos : TFloatPoint;
+begin
+  LastShiftState := Shift;
+
+  if InAction and (ssLeft in Shift) then
+  begin
+    GlobalPos := RemoteGLM.ScreenToGlobalCoord(FloatPoint(X,Y));
+
+    // calculate absolute delta for text output
+    //
+    _RequiresHandlerDraw := true;
+    LocalTextPos := Point(X,Y);
+
+    if AllowSubpixelCoordinates then
+    begin
+      delta.X := (GlobalPos.X - AbsoluteStartPoint.X);
+      delta.Y := (GlobalPos.Y - AbsoluteStartPoint.Y);
+    end
+    else
+    begin
+      delta.X := round(GlobalPos.X - AbsoluteStartPoint.X);
+      delta.Y := round(GlobalPos.Y - AbsoluteStartPoint.Y);
+    end;
+
+    LocalTextHint := '(X '+FloatToStr(Trunc(delta.X * 1000)/1000)+' | Y '+
+                           FloatToStr(Trunc(delta.Y * 1000)/1000)+' )';
+
+
+    // move objects by delta relative to last step
+    //
+    if AllowSubpixelCoordinates then
+    begin
+      delta.X := (GlobalPos.X - StartPoint.X);
+      delta.Y := (GlobalPos.Y - StartPoint.Y);
+      StartPoint := GlobalPos;
+    end
+    else
+    begin
+      delta.X := round(GlobalPos.X - StartPoint.X);
+      delta.Y := round(GlobalPos.Y - StartPoint.Y);
+      StartPoint.X := StartPoint.X + delta.X;
+      StartPoint.Y := StartPoint.Y + delta.Y;
+    end;
+
+    if (delta.X <> 0) or (delta.Y <> 0) then
+      for idx := 0 to self.Selection.Count -1 do
+      begin
+        if (Selection.Entries[idx].obj is TSinglePoint) then
+        begin
+          OnePoint := (Selection.Entries[idx].obj as TSinglePoint);
+          OnePoint.X := OnePoint.X + Delta.X;
+          OnePoint.Y := OnePoint.Y + Delta.Y;
+        end;
+      end;
+
+    if assigned(RefreshRequest) then RefreshRequest(self);
+  end;
+end;
+
+
+
+procedure TMoveObjectsHandler.MouseUp( Sender : TObject;
+                                       Button : TMouseButton;
+                                       Shift  : TShiftState;
+                                       X, Y   : Integer);
+begin
+  _RequiresHandlerDraw := false;
+  if InAction and assigned(RemoteGLM) then
+    RemoteGLM.ClientPaint(Self);
+
+  if InAction and (ssRight in LastShiftState) then
+    if assigned(OnRightclickOneObject) then OnRightclickOneObject(Selection);
+
+  if assigned(Selection) then
+    self.Selection.Clear;
+
+  InAction := False;
+end;
+
+
+
+function TMoveObjectsHandler.SurfaceHandlesEvents( Button   : TMouseButton;
+                                                   Shift    : TShiftState;
+                                                   MousePos : TPoint ): Boolean;
+begin
+  result := ConnectionIsValid and ((ssLeft in Shift) xor (ssRight in Shift));
+end;
+
+
+
+procedure TMoveObjectsHandler.HandlerPaintEvent( Destination    : TBitmap;
+                                                 AbsoluteOrigin : TPoint;
+                                                 CurrentScaling : single);
+begin
+  if not _RequiresHandlerDraw then exit;
+  with Destination.Canvas do
+  begin
+    Brush.Color := cllime;
+    Font.Color := clblack;
+    TextOut( LocalTextPos.X - TextWidth(LocalTextHint) - 8,
+             LocalTextPos.Y - TextHeight(LocalTextHint) div 2,
+             LocalTextHint);
+  end;
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TAssemblePolygonHandler
+
+
+
+constructor TAssemblePolygonHandler.Create;
+begin
+  inherited;
+
+  InAction     := False;
+  IsConnected  := False;
+end;
+
+
+
+destructor TAssemblePolygonHandler.Destroy;
+begin
+  inherited;
+end;
+
+
+
+procedure TAssemblePolygonHandler.Connect(
+                       GLM                   : TGraphicLayerManager;
+                       VOSurface             : TVisualOverlay;
+                       CurrentGroup          : TVectorObjectGroup;
+                       CurrentObject         : TVectorObject;
+                       CurrentSelection      : TMetaData;
+                       RefreshRequestHandler : TNotifyEvent);
+begin
+  inherited;
+
+  ConnectionIsValid := ConnectionIsValid and assigned(CurrentObject);
+end;
+
+
+
+function TAssemblePolygonHandler.SurfaceHandlesEvents( Button   : TMouseButton;
+                                                       Shift    : TShiftState;
+                                                       MousePos : TPoint ): Boolean;
+begin
+  result := false;
+
+  if ssLeft in Shift then
+    result := true;
+end;
+
+
+
+procedure TAssemblePolygonHandler.VectorObjectsChanged( Sender: TObject );
+begin
+  if assigned(RemoteGLM) and self.ConnectionIsValid then
+  begin
+
+    if VectorObjID > -1 then
+     if (RemoteGLM.PolygonList.IndexByID(VectorObjID) = INDEX_NOT_RESOLVED) then
+       Self.Disconnect;
+
+    if GroupID > -1 then
+     if (RemoteGLM.PolygonGroupList.IndexByID(GroupID) = INDEX_NOT_RESOLVED) then
+       Self.Disconnect;
+
+  end;
+end;
+
+
+
+procedure TAssemblePolygonHandler.HandlerPaintEvent( Destination    : TBitmap;
+                                                     AbsoluteOrigin : TPoint;
+                                                     CurrentScaling : single);
+begin
+  if not _RequiresHandlerDraw then exit;
+  with Destination.Canvas do
+  begin
+    Brush.Color := cllime;
+    Font.Color := clblack;
+    TextOut( LocalTextPos.X - TextWidth(LocalTextHint) - 8,
+             LocalTextPos.Y - TextHeight(LocalTextHint) div 2,
+             LocalTextHint);
+  end;
+end;
+
+
+
+procedure TAssemblePolygonHandler.MouseDown( Sender : TObject;
+                                             Button : TMouseButton;
+                                             Shift  : TShiftState;
+                                             X, Y   : Integer );
+begin
+  InAction := False;
+  if not assigned(RemoteGLM) then exit;
+
+  // verify Group Object
+  GroupIdx := RemoteGLM.PolygonGroupList.IndexByID(GroupID);
+  HasGroup := GroupIdx <> INDEX_NOT_RESOLVED;
+  if not HasGroup then exit;
+
+  // probe Polygon Object
+  HasObject := RemoteGLM.PolygonList.IndexByID(VectorObjID) <> INDEX_NOT_RESOLVED;
+  try    HasObject := HasObject and (VectorObj is TSinglePolygon);
+  except HasObject := false;
+  end;
+
+  if HasObject then PolygonWasEmpty := (VectorObj as TSinglePolygon).Count = 0;
+
+  // conclude
+  FirstPointRefIndex := -1;
+  InAction  := HasObject or AutoSelectNext; // either a polygon is assigned or it can be created when needed
+  CheckForPoints(Point(X,Y));
+end;
+
+
+procedure TAssemblePolygonHandler.MouseMove( Sender : TObject;
+                                             Shift  : TShiftState;
+                                             X, Y   : Integer);
+begin
+  if not InAction then exit;
+
+  CheckForPoints(Point(X,Y));
+end;
+
+
+
+procedure TAssemblePolygonHandler.MouseUp  ( Sender : TObject;
+                                             Button : TMouseButton;
+                                             Shift  : TShiftState;
+                                             X, Y   : Integer);
+var EntryIdx: longint;
+begin
+  if not InAction then exit;
+  if not assigned(VectorObj) then exit;
+  if not assigned(RemoteGLM) then exit;
+  if RemoteGLM.PolygonList.IndexByID(VectorObjID) = INDEX_NOT_RESOLVED then exit;
+
+  VectorObj.ChangeFlags(not Cardinal(OBJECT_FLAG_SELECTED) , opAND);
+  remoteGLM.ClientPaint(self);
+
+  if AutoSelectNext then
+  begin
+    EntryIdx := (Group as TPolygonGroup).IndexByID(VectorObjID);
+    if EntryIdx <> INDEX_NOT_RESOLVED then
+    begin
+      if EntryIdx = Group.Count-1 then
+      begin
+        Connect( RemoteGLM, // assume no polygon is available, create one if AutoSelectNext
+                  Surface,
+                  Group,
+                  nil,
+                  nil,
+                  RefreshRequest);
+      end
+      else
+      begin
+        Connect( RemoteGLM, // grab next polygon
+                  Surface,
+                  Group,
+                  Group.Items[EntryIdx +1],
+                  nil,
+                  RefreshRequest);
+      end;
+    end;
+  end;
+
+  InAction := False;
+end;
+
+
+
+procedure TAssemblePolygonHandler.CheckForPoints(ScreenPos: TPoint);
+var
+  idx: longint;
+  OnePoint: TSinglePoint;
+
+  function PointInProximity(testpoint: TPoint): Boolean;
+  begin
+    result:= ( abs(TestPoint.X-ScreenPos.X)+
+               abs(TestPoint.Y-ScreenPos.Y)  ) < 9; {ceil(radius*1.41..};
+  end;
+
+begin
+  for idx := 0 to RemoteGLM.PointList.Count - 1 do
+  begin
+    OnePoint := RemoteGLM.PointList.Items[idx].Obj as TSinglePoint;
+    if PointInProximity(Point( RemoteGLM.GlobalCoordToScreen( FloatPoint( OnePoint.X, OnePoint.Y) ) ) ) then
+    begin
+      // handle
+      IncludePoint(OnePoint);
+      break;
+    end;
+  end;
+end;
+
+
+
+procedure TAssemblePolygonHandler.IncludePoint( pt: TSinglePoint );
+var
+  Poly : TSinglePolygon;
+  RefIdx: longint;
+
+  function ResolvePointGroupID(singlepoint : TSinglePoint):int64;
+  var
+    PGIdx: longint;
+    pg : TPointGroup;
+    Itemidx : longint;
+  begin
+    result := -1;
+    for PGIdx := 0 to RemoteGLM.PointGroupList.Count - 1 do
+    begin
+      if RemoteGLM.PointGroupList.Items[PGIdx].Obj is TPointGroup then
+      begin
+        pg := RemoteGLM.PointGroupList.Items[PGIdx].Obj as TPointGroup;
+        for ItemIdx := 0 to pg.Count - 1 do
+          if pg.Items[ItemIdx].UID = singlepoint.UID then
+          begin
+            result := pg.UID;
+            exit;
+          end;
+      end;
+    end;
+  end;
+
+begin
+  // ...
+  if (not HasObject) and AutoSelectNext then
+  begin
+    Poly := TSinglePolygon.Create;
+    Group.Add(Poly);
+    PolygonWasEmpty := true;
+    HasObject := True;
+
+    self.Connect( RemoteGLM,
+                  Surface,
+                  Group,
+                  Poly,
+                  nil,
+                  RefreshRequest);
+
+    RemoteGLM.RecreateMetaContentLists(self);
+  end
+  else
+  begin
+    if HasObject then
+      Poly := VectorObj as TSinglePolygon
+    else
+      Poly := nil;
+  end;
+
+  if not HasObject then exit;
+
+  // now the existence of both group and polygon is reassured.
+
+  RefIdx := Poly.ReferenceIdxByID(pt.UID);
+
+  if FirstPointRefIndex = -1 then
+  begin
+    poly.Flags := poly.Flags or OBJECT_FLAG_SELECTED;
+  end;
+
+  if RefIdx = -1 then // point not yet added
+  begin // add point
+    FirstPointRefIndex := Poly.InsertPointReference(pt.UID,ResolvePointGroupID(pt), FirstPointRefIndex+1);
+    RemoteGLM.ClientPaint(self);
+  end
+  else
+  begin // this point is already contained in the polygon
+    if (FirstPointRefIndex = -1) then
+    begin
+      FirstPointRefIndex := RefIdx; // start at point underneath the cursor
+      exit;
+    end;
+
+    if FirstPointRefIndex = RefIdx then exit;
+
+    if (RefIdx = (FirstPointRefIndex+1) mod Poly.Count) and (Poly.Count > 1) then
+    begin
+      FirstPointRefIndex := RefIdx; // update FirstPointRefIndex variable
+    end
+    else
+    begin
+      Poly.MovePointReference(RefIdx, (FirstPointRefIndex+1) mod Poly.Count);
+      RemoteGLM.ClientPaint(self);
+    end;
+
+  end;
+
+
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TDeleteObjectsHandler
+
+
+
+procedure TDeleteObjectsHandler.VectorObjectsChanged(Sender: TObject);
+begin
+  //
+end;
+
+
+
+procedure TDeleteObjectsHandler.MouseDown( Sender : TObject;
+                                           Button : TMouseButton;
+                                           Shift  : TShiftState;
+                                           X, Y   : Integer);
+var
+  dlist : TResolverList;
+  idx   : longint;
+begin
+  LastShiftState := Shift;
+  InAction := True;
+
+  if assigned(Selection) then
+    if Selection.Count > 0 then
+    begin
+      dlist := TResolverList.Create;
+
+      for idx := 0 to Selection.Count - 1 do
+      begin
+        if assigned(Selection.Entries[idx].obj) then
+        begin
+          if (Selection.Entries[idx].obj is TVectorObject) then
+            dlist.Append( Selection.Entries[idx].obj,
+                         (Selection.Entries[idx].obj as TVectorObject).UID);
+        end;
+
+        dlist.SortByID;
+
+        if assigned(RemoteGLM) then
+        begin
+          RemoteGLM.DeleteListedVectorObjects(dlist);
+        end;
+      end;
+
+      dlist.Destroy;
+      RemoteGLM.RecreateMetaContentLists(self);
+      if assigned(RefreshRequest) then RefreshRequest(self);
+    end;
+
+end;
+
+
+procedure TDeleteObjectsHandler.MouseMove( Sender : TObject;
+                                           Shift  : TShiftState;
+                                           X, Y   : Integer);
+begin
+  LastShiftState := Shift;
+end;
+
+
+
+procedure TDeleteObjectsHandler.MouseUp( Sender : TObject;
+                                         Button : TMouseButton;
+                                         Shift  : TShiftState;
+                                         X, Y   : Integer);
+begin
+   InAction := False;
+end;
+
+
+
+function TDeleteObjectsHandler.SurfaceHandlesEvents( Button   : TMouseButton;
+                                                     Shift    : TShiftState;
+                                                     MousePos : TPoint ): Boolean;
+begin
+  result := ConnectionIsValid and (ssLeft in Shift);
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//        TMarqueeHandler
+
+
+
+procedure TMarqueeHandler.VectorObjectsChanged(Sender: TObject);
+begin
+  //
+end;
+
+
+
+procedure TMarqueeHandler.MouseDown( Sender : TObject;
+                                     Button : TMouseButton;
+                                     Shift  : TShiftState;
+                                     X, Y   : Integer);
+begin
+  if not assigned(RemoteGLM) then exit;
+
+  RemoteGLM.UnsafeAfterClientPaintEvent.RemoveEvent( ReRenderSelection );
+
+  LastShiftState := Shift;
+  InAction := True;
+
+  GlobalStartPoint := RemoteGLM.ScreenToGlobalCoord(FloatPoint(X,Y));
+  GlobalEndPoint   := GlobalStartPoint;
+end;
+
+
+
+procedure TMarqueeHandler.MouseMove( Sender : TObject;
+                                     Shift  : TShiftState;
+                                     X, Y   : Integer);
+var
+  map : TRectSectionsMap;
+  mx, my: integer;
+begin
+  LastShiftState := Shift;
+
+   if InAction and assigned(RemoteGLM) then
+   begin
+     // calculate
+
+     OldScreenRect.TopLeft     := Point(RemoteGLM.GlobalCoordToScreen(GlobalStartPoint));
+     OldScreenRect.BottomRight := Point(RemoteGLM.GlobalCoordToScreen(GlobalEndPoint));
+
+     GlobalEndPoint := RemoteGLM.ScreenToGlobalCoord(FloatPoint(X,Y)); // new endpoint
+
+     NewScreenRect.TopLeft     := OldScreenRect.TopLeft;
+     NewScreenRect.BottomRight := Point(RemoteGLM.GlobalCoordToScreen(GlobalEndPoint));
+
+     RemoteGLM.UnsafeAfterClientPaintEvent.InsertEvent(ReRenderSelection);
+
+     GenerateSectionsMap(map, OldScreenRect, NewScreenRect);
+
+     for my := 0 to 2 do
+     for mx := 0 to 2 do
+     begin
+       if map.Rects[mx,my].Left > map.Rects[mx,my].Right then
+         exit;
+
+       case map.Fills[mx,my] of
+         1: begin // OldScreenRect only, restore this rect
+              RemoteGLM.UnsafeBlitToScreen(map.Rects[mx,my], SRCCOPY);
+            end;
+
+         2: begin // NewScreenRect only, fill rect with pattern
+              RemoteGLM.UnsafeBlitToScreen(map.Rects[mx,my], NOTSRCCOPY); 
+            end;
+       end;
+     end;
+
+     SelectionRect.Left   := min(GlobalStartPoint.X, GlobalEndPoint.X);
+     SelectionRect.Top    := min(GlobalStartPoint.Y, GlobalEndPoint.Y);
+     SelectionRect.Right  := max(GlobalStartPoint.X, GlobalEndPoint.X);
+     SelectionRect.Bottom := max(GlobalStartPoint.Y, GlobalEndPoint.Y);
+
+     // render diff
+
+   end;
+end;
+
+
+
+procedure TMarqueeHandler.MouseUp( Sender : TObject;
+                                   Button : TMouseButton;
+                                   Shift  : TShiftState;
+                                   X, Y   : Integer);
+var
+  idx: longint;
+begin
+  Shift := LastShiftState;
+
+  RemoteGLM.UnsafeAfterClientPaintEvent.RemoveEvent( ReRenderSelection );
+
+  if InAction and assigned(RemoteGLM) then
+  begin
+    GlobalEndPoint := RemoteGLM.ScreenToGlobalCoord( FloatPoint(X,Y) );
+
+    SelectionRect.Left   := min( GlobalStartPoint.X , GlobalEndPoint.X );
+    SelectionRect.Top    := min( GlobalStartPoint.Y , GlobalEndPoint.Y );
+    SelectionRect.Right  := max( GlobalStartPoint.X , GlobalEndPoint.X );
+    SelectionRect.Bottom := max( GlobalStartPoint.Y , GlobalEndPoint.Y );
+
+    if (ssLeft in Shift) then
+    begin
+      // add selection
+      FindObjectsInsideRectangle(RemoteGLM,SelectionRect,Selection);
+      // select objects
+      for idx := 0 to Selection.Count - 1 do
+        if (Selection.Entries[idx].obj is TVectorObject) then
+           (Selection.Entries[idx].obj as TVectorObject).ChangeFlags(OBJECT_FLAG_SELECTED, opOR);
+      // clean up
+      if assigned(RefreshRequest) then  RefreshRequest(Self);
+    end;
+
+    if (ssRight in Shift) then
+    begin
+      // add selection
+      FindObjectsInsideRectangle(RemoteGLM,SelectionRect,Selection);
+      // de-select objects
+      for idx := 0 to Selection.Count - 1 do
+        if (Selection.Entries[idx].obj is TVectorObject) then
+           (Selection.Entries[idx].obj as TVectorObject).ChangeFlags(not Cardinal(OBJECT_FLAG_SELECTED), opAND);
+      // clean up
+      if assigned(RefreshRequest) then  RefreshRequest(Self);
+    end;
+
+    RemoteGLM.RecreateMetaContentLists(self);
+
+  end;
+
+  InAction := False;
+end;
+
+
+
+function TMarqueeHandler.SurfaceHandlesEvents( Button   : TMouseButton;
+                                               Shift    : TShiftState;
+                                               MousePos : TPoint ): Boolean;
+begin
+  result := ConnectionIsValid and ((ssLeft in Shift) or (ssRight in Shift));
+end;
+
+
+
+procedure TMarqueeHandler.ReRenderSelection(Obj : TObject);
+  var r: TRect;
+begin
+  if not InAction then exit;
+
+  // ok this is a bit of a workaround but immediate access is needed ...
+
+  if assigned(obj) then
+    if obj is TForm then
+      parent := obj as TForm;
+  
+  if not assigned(parent) then exit;
+
+  r := Rect(
+      Point(RemoteGLM.GlobalCoordToScreen(SelectionRect.TopLeft)),
+      Point(RemoteGLM.GlobalCoordToScreen(SelectionRect.BottomRight)) );
+
+  Windows.BitBlt( parent.Canvas.Handle,
+                 r.Left, r.Top,r.Right - r.Left, r.Bottom - r.Top,
+                 0,r.Left,r.Top,DSTINVERT);
+end;
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+
+end.

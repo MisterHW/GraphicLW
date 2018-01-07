@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2011.06.15 10:12:31.540.pas,C:\Users\Pharao\Documents\Borland Studio-Projekte\Unit1.pas=C:\Program Files\GraphicLW\codesegments\__ unused __\GraphicEx\TIFF Demo\Unit1.pas</Transaction>
+    <Transaction>2011.06.15 10:12:31.540.dfm,C:\Users\Pharao\Documents\Borland Studio-Projekte\Unit1.dfm=C:\Program Files\GraphicLW\codesegments\__ unused __\GraphicEx\TIFF Demo\Unit1.dfm</Transaction>
+    <Transaction>2011.06.15 10:12:35.679.bdsproj,C:\Users\Pharao\Documents\Borland Studio-Projekte\Project1.bdsproj=C:\Program Files\GraphicLW\codesegments\__ unused __\GraphicEx\TIFF Demo\TIFFDemo.bdsproj</Transaction>
+  </Transactions>
+</BorlandProject>

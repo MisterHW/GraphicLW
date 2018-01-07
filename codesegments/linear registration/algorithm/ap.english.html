@@ -1,0 +1,160 @@
+<html>
+<head>
+
+<title>AP Library adapted for Delphi</title>
+<style type="text/css">
+<!--
+h1 { font-family: Tahoma,sans-serif; font-size : larger; }
+h2 { font-family: Arial,sans-serif; font-size : 12pt; }
+h3 { font-family: Arial,sans-serif; font-size : 9pt; }
+pre { font-family: Courier New, monospace; color:#222222; }
+.const { color:#222222; }
+.func  { color:#111111; }
+-->
+</style>
+</head>
+<body>
+
+<h1>AP Library adapted for Delphi</h1>
+
+<p align=justify>
+The document describes an AP library adapted for Delphi. The AP library for Delphi contains a basic set of mathematical functions and collection classes needed to run the programs from the <a href="http://www.alglib.net/">ALGLIB</a> website.
+</p>
+
+<h2>Compatibility</h2>
+
+<p align=justify>
+This library should be compatible with all Object Pascal compilators starting with version supplied with Borland Delphi 4.0 (Note:  if you have found any incompatibility, please let me know. Don't forget to write compiler version and type of error). This sources hadn't been tested under Kylix, I will appreciate any information about the results if someone will carry out such a test.
+</p>
+
+<h2>Structure and Use</h2>
+
+<p align=justify>
+The library includes the only module <code>ap.pas</code>. To use the library, you should include this file to the project.
+</p>
+
+<h1>AP library description</h1>
+
+<a href="#const">Constants</a><br> <a href="#funct">Functions</a><br> <a href="#array">Arrays</a><br><a href="#complex">Complex numbers operations</a><br></font>
+
+<a name="const"><h1>Constants </h1></a>
+
+<p align=justify>
+<span class=const>MachineEpsilon</span><br>
+The constant represents the accuracy of machine operations, that is the minimum number for <code>1+machineepsilon&ne;1</code> in the given bit grid. The constant may be taken &quot;oversized&quot;, that is real accuracy can be even higher.
+</p>
+
+<p align=justify>
+<span class=const>MaxRealNumber</span><br>
+The constant represents the highest value of the positive real number, which could be represented on this machine. The constant may be taken &quot;oversized&quot;, that is real boundary can be even higher.
+</p>
+
+<p align=justify>
+<span class=const>MinRealNumber</span><br>
+The constant represents the lowest value of positive real number, which could be represented on this machine. The constant may be taken &quot;oversized&quot;, that is real boundary can be even lower.
+</p>
+
+<a name="funct"><h1>Functions</h1></a>
+
+<p align=justify>
+<span class=func><b>function</b> AbsReal(X : Extended):Extended;</span><br> Returns absolute value of a real number. This function is equivalent to the standard Abs function.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> AbsInt (I : Integer):Integer;</span><br> Returns absolute value of an integer. This function is equivalent to the standard Abs function.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> RandomReal():Extended;</span><br> Returns a random real number from half-interval [0,1).
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> RandomInteger(I : Integer):Integer;</span><br> Returns a random integer between 0 and I-1.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> Sign(X:Extended):Integer;</span><br> Returns:<br> +1, if X&gt;0<br> -1, if X&lt;0<br> 0, if X=0.
+</p>
+
+<p align=justify>
+<span class=func><b>function</b> DynamicArrayCopy(<b>const</b> A: TInteger1DArray):TInteger1DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TReal1DArray):TReal1DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TComplex1DArray):TComplex1DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TBoolean1DArray):TBoolean1DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TInteger2DArray):TInteger2DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TReal2DArray):TReal2DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TComplex2DArray):TComplex2DArray;<b>overload</b>;<br> <b>function</b> DynamicArrayCopy(<b>const</b> A: TBoolean2DArray):TBoolean2DArray;<b>overload</b>;</span><br> This function set is used to to make copies of one- and two-dimensional arrays.
+</p>
+
+<a name="array"><h1>Arrays</h1></a>
+
+<p align=justify>
+The following types of dynamic arrays are defined in standard AP library:
+</p>
+
+<pre>
+<b>type</b>
+    TInteger1DArray     = array of LongInt;
+    TReal1DArray        = array of Double;
+    TComplex1DArray     = array of Complex;
+    TBoolean1DArray     = array of Boolean;
+
+    TInteger2DArray     = array of array of LongInt;
+    TReal2DArray        = array of array of Double;
+    TComplex2DArray     = array of array of Complex;
+    TBoolean2DArray     = array of array of Boolean;
+</pre>
+
+<a name="complex"><h1>Complex numbers operations</h1></a>
+
+<p align=justify>
+As there is no operator overloading in Object Pascal (and it is often subjected to criticism from C++ adepts), operations with complex numbers could not be implemented as easy as with built-in data type. Therefore <code>Complex</code> data type is defined in a library. It is a record with two real number fields <code>x</code> and <code>y</code>, and all the operations are performed with the use of special functions implementing addition, multiplication, subtraction and division. An input can be complex or real, and output is complex. These functions are listed below.
+</p>
+
+<p align=justify>
+<span class=func><b>function</b> C_Add(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Complex;<br> <b>function</b> C_AddR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Complex;</span><br> Calculate <i>Z1+Z2</i> or <i>Z1+R</i>.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Sub(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Complex;<br> <b>function</b> C_SubR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Complex;<br> <b>function</b> C_RSub(<b>const</b> R : Double; <b>const</b> Z1 : Complex):Complex;</span><br> Calculate <i>Z1-Z2</i>, <i>Z1-R</i> or <i>R-Z1</i>.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Mul(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Complex;<br> <b>function</b> C_MulR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Complex;</span><br> Calculate <i>Z1*Z2</i> or <i>Z1*R</i>.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Div(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Complex;<br> <b>function</b> C_DivR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Complex;<br> <b>function</b> C_RDiv(<b>const</b> R : Double; <b>const</b> Z2 : Complex):Complex;</span><br> Calculate <i>Z1/Z2</i>, <i>Z1/R</i> or <i>R/Z2</i>.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Equal(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Boolean;<br> <b>function</b> C_EqualR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Boolean;<br> <b>function</b> C_NotEqual(<b>const</b> Z1 : Complex; <b>const</b> Z2 : Complex):Boolean;<br> <b>function</b> C_NotEqualR(<b>const</b> Z1 : Complex; <b>const</b> R : Double):Boolean;</span><br> Compare <i>Z1</i> and <i>Z2</i> or <i>Z1</i> and <i>R</i>.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Complex(<b>const</b> X : Double):Complex;</span><br> Converts a real number into equal complex number.
+</p>
+
+
+<p align=justify>
+<span class=func><b>function</b> C_Opposite(<b>const</b> Z : Complex):Complex;</span><br> Returns <i>-Z</i>.
+</p>
+
+<p align=justify>
+<span class=func><b>function</b> AbsComplex(<b>const</b> Z : Complex):Double;</span><br> Returns the modulus of complex number z. Modulus calculation is performed using so called &quot;safe&quot; algorithm, that could never cause overflow when calculating intermediate results. 
+</p>
+
+<p align=justify>
+<span class=func><b>function</b> Conj(<b>const</b> Z : Complex):Complex;</span><br> Returns complex conjugate to z. 
+</p>
+
+<p align=justify>
+<span class=func><b>function</b> CSqr(<b>const</b> Z : Complex):Complex;</span><br> Returns the square of z.
+</p>
+
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+unit MathUtils;
+
+interface
+uses classes;
+
+  function CloneStream(inp: TMemorystream):TMemoryStream;
+  procedure SortSingleData(Data: Pointer; size: longint);
+
+implementation
+
+  type PSingle = ^single;
+
+
+
+  function CloneStream(inp: TMemorystream):TMemoryStream;
+  begin
+    result := TMemorystream.Create;
+    inp.SaveToStream(result);
+  end;
+
+
+
+  procedure SortSingleData(Data: Pointer; size: longint);
+  var
+    pivot, temp: single;
+    l,r: longint;
+
+    function ReadSingle(idx: longint): single;
+    begin
+      result := Psingle(Cardinal(data)+ idx shl 2)^;
+    end;
+
+    procedure WriteSingle(idx: longint; val: single);
+    var p: ^single;
+    begin
+      p := Pointer(Cardinal(data)+ idx shl 2);
+      p^ := val;
+    end;
+
+    var buf: single;
+
+   procedure quicksort(Data: Pointer;bereichsanfang, bereichsende: Integer);
+   var
+      links, rechts       : integer;
+      zerlegendes_element : single;
+      tauschpuffer        : single;
+
+   begin
+      if (bereichsende-bereichsanfang > 0) then {Abbruchbedingung}
+      begin
+
+         links  := bereichsanfang-1;
+         rechts := bereichsende;
+         zerlegendes_element := readsingle(bereichsende);
+
+         repeat
+            repeat inc(links) until
+               (readsingle(links) >= zerlegendes_element);
+            repeat dec(rechts) until
+               (readsingle(rechts) <= zerlegendes_element);
+            tauschpuffer := readsingle(links);
+            writesingle(links,readsingle(rechts));
+            writesingle(rechts,tauschpuffer);
+         until rechts <= links;
+
+      writesingle(rechts,       readsingle(links));
+      writesingle(links,        readsingle(bereichsende));
+      writesingle(bereichsende, tauschpuffer);
+
+      quicksort(Data,bereichsanfang,links-1);         {zwei rekursive}
+      quicksort(Data,links+1       ,bereichsende);    {Aufrufe       }
+      end
+   end;
+
+  begin
+     quicksort(Data,0,size div 4-1);
+  {
+    for l := 0 to (size div 4) -1 do
+      for r := l+1 to (size div 4) -1 do
+        if ReadSingle(r) < ReadSingle(l) then
+        begin
+          buf := readsingle(r);
+          storesingle(r,readsingle(l));
+          storesingle(l,buf);
+        end;}
+  end;
+
+
+
+
+
+end.

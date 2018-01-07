@@ -1,0 +1,280 @@
+unit DragDropButtons;
+
+interface
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, Buttons, StdCtrls, ExtCtrls, Math, Menus, ActnPopup;
+
+
+type TSetOperationEvent = procedure(Source, Dest: longint) of object;
+
+type TDragDropButtonField = class(TPanel)
+  constructor Create(Sender: TComponent);
+  destructor Destroy; override;
+
+private
+  Image1: TImage;
+
+  StartObject : TSpeedButton;
+  EndObject   : TSpeedButton;
+
+  SourceID    : longint;
+  DestID      : longint;
+
+  moving      : Boolean;
+
+  PlusEvent   : TSetOperationEvent;
+  MinusEvent  : TSetOperationEvent;
+
+  cnt         : longint;
+
+  procedure UpdateArrow(a, b: TSpeedButton; target: TImage);
+  procedure DNDMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  procedure DNDMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+  procedure DNDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  procedure ResetIllustration;
+  procedure Image1Click(Sender: TObject);
+  procedure PlusButtonClick(Sender: TObject);
+  procedure MinusButtonClick(Sender: TObject);
+public
+  PlusButton  : TSpeedButton;
+  MinusButton : TSpeedButton;
+  ActionBar   : TPopupActionBar;
+
+  property SourceObject : longint read SourceID;
+  property DestObject   : longint read DestID;
+
+  function NewButton(ID: longint): TSpeedButton;
+end;
+
+
+implementation
+
+
+
+procedure TDragDropButtonField.UpdateArrow(a, b: TSpeedButton; target: TImage);
+var
+ recta, rectb: TRect;
+ arrowstartx, arrowendx: integer;
+begin
+  with image1.Picture do
+  begin
+    Bitmap.Canvas.Brush.Color := Self.Color;
+    if Bitmap.Height * Bitmap.Width = 0 then
+    begin
+      Bitmap.Width  := image1.Width;
+      Bitmap.Height := image1.Height;
+    end;
+    Bitmap.Canvas.FillRect(rect(0,0,image1.width, image1.Height));
+
+    if not assigned(a) then exit;
+    recta := a.BoundsRect;
+
+    Bitmap.Canvas.Pen.Color := $303030;
+    Bitmap.Canvas.Pen.Width := 2;
+
+    Bitmap.Canvas.MoveTo(recta.Left -image1.Left,image1.Height-2);
+    Bitmap.Canvas.LineTo(recta.Right-image1.Left,image1.Height-2);
+
+    if assigned(b) and (a<>b) then
+    begin
+      rectb := b.BoundsRect;
+
+      arrowstartx := (recta.Left + recta.Right) div 2;
+      arrowendx   := (rectb.Left + rectb.Right) div 2;
+
+      Bitmap.Canvas.MoveTo( arrowstartx -image1.Left,
+                            image1.Height-2);
+      Bitmap.Canvas.LineTo( arrowstartx-image1.Left + 8 * sign(arrowendx- arrowstartx),
+                            image1.Height-2-8);
+
+      Bitmap.Canvas.LineTo( arrowendx  -image1.Left - 8 * sign(arrowendx- arrowstartx),
+                            image1.Height-2-8);
+
+      Bitmap.Canvas.LineTo( arrowendx -image1.Left,
+                            image1.Height-2);
+
+      // Bitmap.Canvas.Pen.Color := clblue;
+
+      Bitmap.Canvas.MoveTo(rectb.Left -image1.Left,image1.Height-2);
+      Bitmap.Canvas.LineTo(rectb.Right-image1.Left,image1.Height-2);
+    end;
+
+
+  end;
+end;
+
+procedure TDragDropButtonField.DNDMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  StartObject := nil;
+  EndObject   := nil;
+
+  if not assigned(Sender) then exit;
+  if not (Sender is TSpeedButton) then exit;
+  X := X + (Sender as TSpeedButton).Left;
+  Y := Y + (Sender as TSpeedButton).Top;
+
+  StartObject := Sender as TSpeedButton;
+  EndObject   := StartObject;
+
+  PlusButton.Hide;
+  MinusButton.Hide;
+  UpdateArrow(StartObject, EndObject,Image1);
+  moving := true;
+end;
+
+procedure TDragDropButtonField.DNDMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var
+  pos: TPoint;
+begin
+  if (not assigned(StartObject)) or (not moving) then exit;
+
+  if not assigned(Sender) then exit;
+  if not (Sender is TSpeedButton) then exit;
+  X := X + (Sender as TSpeedButton).Left;
+  Y := Y + (Sender as TSpeedButton).Top;
+
+  Sender := (Sender as TSpeedButton).Parent.ControlAtPos( Point(X,Y), false, true, true);
+  if not (Sender is TSpeedButton) then exit;
+
+  if  EndObject <> Sender then
+  begin
+    EndObject := Sender as TSpeedButton;
+    UpdateArrow(StartObject, EndObject,Image1);
+  end;
+end;
+
+
+procedure TDragDropButtonField.DNDMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  pt: TPoint;
+begin
+  moving := False;
+  if not assigned(StartObject) then exit;
+
+  if not assigned(Sender) then exit;
+  if not (Sender is TSpeedButton) then exit;
+  X := X + (Sender as TSpeedButton).Left;
+  Y := Y + (Sender as TSpeedButton).Top;
+
+  Sender := (Sender as TSpeedButton).Parent.ControlAtPos( Point(X,Y), false, true, true);
+
+  if (Sender is TSpeedButton) then
+  if  EndObject <> Sender then
+  begin
+    EndObject := Sender as TSpeedButton;
+    UpdateArrow(StartObject, EndObject,Image1);
+  end;
+
+  UpdateArrow(StartObject, EndObject,Image1);
+
+{  if EndObject <> StartObject then
+    memo1.Lines.Add(StartObject.Caption + ' >> ' + EndObject.Caption)
+  else
+    memo1.Lines.Add('self : ' + StartObject.Caption);}
+
+  if StartObject = EndObject then
+  begin
+    UpdateArrow(nil,nil,Image1);
+    pt := StartObject.ClientToScreen(Point(0,StartObject.Height));
+    if assigned(ActionBar) then ActionBar.Popup(pt.X, pt.Y);
+  end
+  else
+  begin
+    PlusButton.Left  := (EndObject.Left + EndObject.Width div 2) - PlusButton.Width;
+    MinusButton.Left := (EndObject.Left + EndObject.Width div 2) + 2;
+    PlusButton.Show;
+    MinusButton.Show;
+  end;
+end;
+
+procedure TDragDropButtonField.ResetIllustration;
+begin
+  PlusButton.Hide;
+  MinusButton.Hide;
+  UpdateArrow(nil, nil, Image1);
+end;
+
+procedure TDragDropButtonField.Image1Click(Sender: TObject);
+begin
+  ResetIllustration;
+end;
+
+procedure TDragDropButtonField.PlusButtonClick(Sender: TObject);
+begin
+  ResetIllustration;
+  if assigned(Self.PlusEvent) then PlusEvent(SourceID, DestID);
+end;
+
+procedure TDragDropButtonField.MinusButtonClick(Sender: TObject);
+begin
+  ResetIllustration;
+  if assigned(Self.MinusEvent) then MinusEvent(SourceID, DestID);
+end;
+
+
+function TDragDropButtonField.NewButton(ID: longint): TSpeedButton;
+var
+  button : TSpeedButton absolute Result;
+begin
+  button := TSpeedButton.Create(self);
+  self.InsertControl(button);
+  button.Height := 22;
+  button.Width := 22;
+  button.Top := 24;
+  button.Left := 10 + (22+4) * cnt;
+  inc(cnt);
+  button.OnMouseDown := DNDMouseDown;
+  button.OnMouseUp   := DNDMouseUp;
+  Button.OnMouseMove := DNDMouseMove;
+  Button.Transparent := true;
+  Button.Flat := True;
+  self.Width := (22 + 4)*cnt + 8 * 2;
+end;
+
+
+constructor TDragDropButtonField.Create(Sender: TComponent);
+begin
+  inherited;
+  self.Height := 54;
+  self.BevelInner := bvNone;
+  self.BevelOuter := bvNone;
+  self.BorderStyle := bsNone;
+  self.Width  := 22 + 8 * 2;
+
+  image1 := TImage.Create(self);
+  image1.Parent := self;
+  image1.SetBounds(2,0,(22+4)*32,24);
+  image1.Picture := TPicture.Create;
+  image1.Picture.Bitmap := TBitmap.Create;
+  image1.OnClick := Image1Click;
+
+  PlusButton := TSpeedButton.Create(self);
+  PlusButton.Parent := self;
+  PlusButton.Caption := '+';
+  PlusButton.SetBounds(2,5,16,16);
+  PlusButton.Visible := false;
+  PlusButton.OnClick := PlusButtonClick;
+
+  MinusButton := TSpeedButton.Create(self);
+  MinusButton.Parent  := self;
+  MinusButton.Caption := '-';
+  MinusButton.SetBounds(2,5,16,16);
+  MinusButton.Visible := false;
+  MinusButton.OnClick := MinusButtonClick;
+end;
+
+
+destructor TDragDropButtonField.Destroy;
+begin
+  image1.Destroy;
+  PlusButton.Destroy;
+  MinusButton.Destroy;
+
+  inherited;
+end;
+
+end.

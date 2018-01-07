@@ -1,0 +1,788 @@
+unit GLWFilters;
+
+
+
+interface
+uses
+  windows,Sysutils,Graphics,Classes,Types,Math,
+  GLWDef,GLMFunctionality, MathUtils, forms;
+
+type TLookupBitmapFunc = function(UID: longint):TBitmap of object;
+
+function ExecuteFilterAction( image: TBitmap;
+                              var Filter: TFilterInstruction;
+                              LookupByIDFunc: TLookupBitmapFunc = nil) : Boolean;
+
+procedure BrightnessBalancerPercentileGraph( source: TBitmap;
+                                             graph: TBitmap;
+                                             mask: TBitmap;
+                                             area: TRect;
+                                             cubesize: integer;
+                                             MaskThreshold: byte;
+                                             IntervalCenter: byte;
+                                             IntervalWidth: byte;
+                                             targetedbrightness: integer;
+                                             multiscaled: boolean;
+                                             normalize: Boolean = true);
+
+
+implementation
+
+type TEnvCube = record
+  cmx, cmy: integer;
+  weight: integer;  // fill factor -> / 256
+  cfactor: single; // 0..?
+end;
+
+
+function ChrominanceFilter(img: TBitmap; Data: Pointer; DataSize: integer): Boolean;
+var
+  i,k: integer;
+  t: PBytearray;
+  a,r,g,b: byte;
+  s: single;
+begin
+ for k := 0 to img.height-1 do
+  begin
+  t := img.ScanLine[k];
+  for i := 0 to img.Width -1 do
+  begin
+      r := T[i*3]  ;
+      g := T[i*3+1];
+      b := T[i*3+2];
+      a := round(sqrt( sqr(-0.866*r + 0.866*b) + sqr(-0.5*r + g - 0.5*b)));
+      s := sqrt(a/255);
+      T[i*3]   := round(r*s);
+      T[i*3+1] := round(g*s);
+      T[i*3+2] := round(b*s);
+  end;
+  end;
+
+  result := true;
+end;
+
+
+function DepleteColorsFilter(img: TBitmap; Data: Pointer; DataSize: integer): Boolean;
+var
+  i,k: integer;
+  t: PBytearray;
+  a: Cardinal;
+begin
+ for k := 0 to img.height-1 do
+  begin
+  t := img.ScanLine[k];
+  for i := 0 to img.Width -1 do
+  begin
+      a := round(0.299*T[i*3] + 0.587*T[i*3+1] + 0.114*T[i*3+2]);
+
+      T[i*3]   := a;
+      T[i*3+1] := a;
+      T[i*3+2] := a;
+  end;
+  end;
+
+  result := true;
+end;
+
+
+function InvertFilter(img: TBitmap; Data: Pointer; DataSize: integer): Boolean;
+var
+  i,k: integer;
+  t: PBytearray;
+begin
+ for k := 0 to img.height-1 do
+  begin
+  t := img.ScanLine[k];
+  for i := 0 to img.Width -1 do
+  begin
+      T[i*3]   := 255 - T[i*3];
+      T[i*3+1] := 255 - T[i*3+1];
+      T[i*3+2] := 255 - T[i*3+2];
+  end;
+  end;
+
+  result := true;
+end;
+
+
+
+
+
+function BrightnessBalancer(
+  img: TBitmap;
+  mask: TBitmap;
+  cubesize: integer;
+  usemasklayer: Boolean;
+  multiscaled: Boolean;
+  settobrightness: Boolean;
+  brightness: integer;
+  MaskTreshold,
+  QuantileCenter,
+  QuantileWidth: Byte;
+
+  OUT_COEFF_LAYER: TBitmap = nil;
+  OUT_RAW_BALANCED_LAYER: TBitmap = nil)  : Boolean;
+
+var
+  grid: TBitmap;
+  P,M,G: PByteArray;                 // Picture, Mask, Grid byte arrays
+  x,bx,by,cx, cy,w,h: integer;       // absolute coordinates, grid base vector, relative cube vector
+  cmx, cmy: integer;                 // center of mass relative coordinates per cube,
+  a: Array[0..128*128] of Cardinal;  // brightness values to be sorted
+  acur, astart, aend, acnt: integer; // array cursor
+  aav : double;
+
+  env: Array[0..24] of TEnvCube;
+  ecur: integer;
+  i,j: integer;
+  G2: PByteArray;
+  finalbrightness, cnt: longint;
+  weightsum, spatialweight: single;
+  coeff: single;
+  radius: integer;
+
+  const
+    OFFSET_STAT_BRIGHTNESS = 0;
+    OFFSET_CM_X   = 1;
+    OFFSET_CM_Y   = 2;
+    OFFSET_WEIGHT = 3;
+
+  function CubesWithinRange(GridX, GridY, radius: integer): Boolean;
+  var
+    i,j: integer;
+    G2: PByteArray;
+  begin
+    result := false;
+    for j := max(0,GridY -radius) to min(grid.Height-1,GridY+radius) do
+    begin
+      G2 := grid.ScanLine[j];
+      for i := max(0,GridX -radius) to min(grid.Width-1,GridX+radius) do
+      begin
+        if G2[i shl 2 +OFFSET_STAT_BRIGHTNESS] <> 0 then
+        begin
+          result := true;
+          break;
+        end;
+      end; // for i
+      if result then break;
+    end; // for j
+  end;
+
+begin
+    result := true;
+
+    // define neighbourhood order as "radius" (in blocks)
+    if multiscaled
+      then radius := 2
+      else radius := 1;
+
+    w := img.Width;
+    h := img.Height;
+
+    // define brightness estimation grid
+      // usage of the 8-bit channels:
+      //
+      // 0: statistical nominal brightness
+      // 1: CM.x
+      // 2: CM.y
+      // 3: weight [0,255]
+    grid := TBitmap.Create;
+    grid.Canvas.Brush.Color := clWhite;
+    grid.PixelFormat := pf32bit;
+    grid.Width  := ceil(w / cubesize);
+    grid.Height := ceil(h / cubesize);
+
+
+    if assigned(OUT_RAW_BALANCED_LAYER) then
+      OUT_RAW_BALANCED_LAYER.Canvas.Draw(0,0,img);
+
+    // fill grid  with analysis data
+    //
+    for by := 0 to grid.Height - 1 do
+    begin
+      G := grid.ScanLine[by];
+      for bx := 0 to grid.Width - 1 do
+      begin
+        // analyse cube[cx,cy] -> store results to G[bx shl 2]
+        cmx  := 0;
+        cmy  := 0;
+        acur := 0;
+
+        if usemasklayer then
+        begin
+          // obtain cube pixel brightness values:
+          //   loop over all pixels (x_origin+cx|y_origin+cy) within cube(bx|by)
+          //   get center-of-mass coordinates
+          //   add pixel brightness to a[]
+          //
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break;
+            P :=  img.ScanLine[by*cubesize+cy];
+            M := mask.ScanLine[by*cubesize+cy];
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break;
+              x := x * 3;
+              if (M[x  ] >= MaskTreshold) or
+                 (M[x+1] >= MaskTreshold) or
+                 (M[x+2] >= MaskTreshold) then // suggestion: improve by using weighting function (1 - gradientstrength of img) -> surpress areas with high contrast
+              begin
+                a[acur] := P[x] + P[x+1] + P[x+2]; // simplified brightness value
+                acur    := acur + 1;
+                cmx     := cmx + cx + 1;
+                cmy     := cmy + cy + 1;
+              end; // if masked-in
+            end; // for cx
+          end; // for cy
+        end
+        else // don't use mask layer
+        begin
+          // almost the same as above but CM is trivial
+          // and all pixels are added to a[]
+          //
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break;
+            P := img.ScanLine[by*cubesize+cy];
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break;
+              x := x * 3;
+              a[acur] := P[x] + P[x+1] + P[x+2]; // simplified brightness value
+              acur := acur +1;
+            end;
+          end;
+          cmx := cubesize div 2;
+          cmy := cubesize div 2;
+        end;
+
+        // cube data is acquired
+        if acur > 0 then
+        begin
+          if acur > 1 then SortCardinalData(@a[0],acur);
+
+          // average over interval for stat_brightness
+          astart := round( (acur-1) * min(100, max(0, (QuantileCenter - abs(QuantileWidth)/2) )) /100 );
+          aend   := round( (acur-1) * min(100, max(0, (QuantileCenter + abs(QuantileWidth)/2) )) /100 );
+          aav := 0;
+          for acnt := astart to aend do aav := aav + a[acnt];
+          aav := aav / (abs(aend - astart)+1);
+
+          G[bx shl 2+OFFSET_STAT_BRIGHTNESS] := trunc(aav / 3);                        // nominal brightness derived from representative interval
+          G[bx shl 2+OFFSET_CM_X           ] := cmx div acur;                          // CM.x
+          G[bx shl 2+OFFSET_CM_Y           ] := cmy div acur;                          // CM.y
+          G[bx shl 2+OFFSET_WEIGHT         ] := round((acur*255)/(cubesize*cubesize)); // 0..255 fill factor, where acur in [0,cubesize²]
+        end
+        else
+        begin
+          G[bx shl 2+OFFSET_STAT_BRIGHTNESS] := 0;               // nominal brightness
+          G[bx shl 2+OFFSET_CM_X           ] := cubesize div 2;  // CM.x
+          G[bx shl 2+OFFSET_CM_Y           ] := cubesize div 2;  // CM.y
+          G[bx shl 2+OFFSET_WEIGHT         ] := 0;               // fill factor
+        end;
+
+      end; // for bx
+    end; // for by
+
+
+    // obtain average brightness
+    finalbrightness := 0; cnt := 0;
+    if settobrightness then
+      finalbrightness := brightness
+    else
+    begin
+      cnt := 0;
+      for by := 0 to grid.Height - 1 do
+      begin
+      G := grid.ScanLine[by];
+        for bx := 0 to grid.Width - 1 do
+        begin
+          if G[bx shl 2+OFFSET_WEIGHT] <> 0 then  // cube isn't masked out
+          begin
+            finalbrightness := finalbrightness + G[bx shl 2+OFFSET_STAT_BRIGHTNESS];
+            cnt := cnt + 1;
+          end; // if
+        end; // for bx
+      end; // for by
+
+      if cnt <> 0 then
+        finalbrightness := finalbrightness div cnt
+      else
+        finalbrightness := brightness; // Am I paranoid?
+    end; // else
+
+
+    // apply changes over total image, block-wise processing: for each grid cube
+    for by := 0 to grid.Height - 1 do
+    begin
+      G := grid.ScanLine[by];
+      for bx := 0 to grid.Width - 1 do
+      begin
+        //if G[bx shl 2+OFFSET_WEIGHT] <> 0 then  // cube isn't (completely) masked out  - EXTEND TO CHECK WITHIN NEIGHBOURHOOD!!!
+        if CubesWithinRange(bx, by, radius) then  // make sure the env[] array can be filled with cubes.
+                                                  // This way, even empty cubes (no pixel above the mask threshold)
+                                                  // with non-zero mask pixels can be subtly processed -> no artifacts at masked edges
+        begin
+            // prepare environment information:
+            // copy neighbour cube data to env[]
+            ecur := 0;
+            for j := max(0,by -radius) to min(grid.Height-1,by+radius) do
+            begin
+              G2 := grid.ScanLine[j];
+              for i := max(0,bx -radius) to min(grid.Width-1,bx+radius) do
+              begin
+                 if G2[i shl 2 +OFFSET_STAT_BRIGHTNESS] = 0
+                   then env[ecur].cfactor := 1
+                   else env[ecur].cfactor := (finalbrightness) / G2[i shl 2 +OFFSET_STAT_BRIGHTNESS];
+
+                 env[ecur].cmx    := G2[i shl 2 + OFFSET_CM_X  ]+cubesize * (i-bx)+2; // include grid-scale shifts
+                 env[ecur].cmy    := G2[i shl 2 + OFFSET_CM_Y  ]+cubesize * (j-by)+2;
+                 env[ecur].weight := G2[i shl 2 + OFFSET_WEIGHT];
+
+                 ecur := ecur +1;
+              end; // for i
+            end; // for j
+
+          // process image pixels within current cube
+          for cy := 0 to cubesize -1 do
+          begin
+
+            if by*cubesize+cy = h then break; // index out of range
+            P := img.ScanLine[by*cubesize+cy];
+            if UseMaskLayer then M := mask.ScanLine[by*cubesize+cy];
+
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break; // index out of range
+              x := x * 3;
+
+              // calculate per-pixel correction factor
+                weightsum := 0; coeff := 0;
+                for i := 0 to ecur -1 do // loop over all cubes in the environment
+                begin
+                  spatialweight := ( exp(-1.5*( (env[i].cmx-cx)*(env[i].cmx-cx) +
+                                                (env[i].cmy-cy)*(env[i].cmy-cy) )
+                                              / (cubesize*cubesize) )
+                                    * env[i].weight ) / 256;
+                  weightsum := weightsum + spatialweight;
+                  coeff := coeff + env[i].cfactor * spatialweight;
+                end;
+
+                // masked-out cubes have been considered in the above if case,
+                // no divide by zero possible (yeah right. I've seen it all.
+                // Invalid floating point op. n stuff...)
+                if weightsum <> 0 then
+                  coeff := coeff / weightsum // pixel manipulation coefficient
+                else
+                  coeff := 1;
+
+              // apply modifications
+                if not UseMaskLayer then
+                begin
+                  P[x  ] := min(255,round(P[x  ]*coeff));
+                  P[x+1] := min(255,round(P[x+1]*coeff));
+                  P[x+2] := min(255,round(P[x+2]*coeff));
+                end // not use masklayer
+                else
+                begin // use mask layer
+                    // new transformation enables smooth transparency masks
+                    // warning: cubes without mask pixels above the mask threshold are masked out
+                    // but may contain mask pixels below threshold that mask-in pixels without
+                    // a correct coeff value.
+                    // Consequently, there shall not be any masked-out cubes but instead mask-weighted
+                    // pixel statistics within each cube, mask-weighted centers of mass for absolutely precise
+                    // results. However, everything is fine as long as the mask slopes stay within the neighbourhood reach
+                    // of cubes with good statistics.
+                    //
+                    P[x  ] := min(255, round( P[x  ] * (coeff*M[x  ] + 1*(255-M[x  ])) / 255 ) );
+                    P[x+1] := min(255, round( P[x+1] * (coeff*M[x+1] + 1*(255-M[x+1])) / 255 ) );
+                    P[x+2] := min(255, round( P[x+2] * (coeff*M[x+2] + 1*(255-M[x+2])) / 255 ) );
+                end; // use masklayer
+
+            end; // for cx
+          end; // for cy
+
+
+          if assigned(OUT_COEFF_LAYER) then
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break; // index out of range
+            P := OUT_COEFF_LAYER.ScanLine[by*cubesize+cy];
+            if UseMaskLayer then M := mask.ScanLine[by*cubesize+cy];
+
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break; // index out of range
+              x := x * 3;
+
+              // calculate per-pixel correction factor
+                weightsum := 0; coeff := 0;
+                for i := 0 to ecur -1 do // loop over all cubes in the environment
+                begin
+                  spatialweight := ( exp(-1.5*( (env[i].cmx-cx)*(env[i].cmx-cx) +
+                                                (env[i].cmy-cy)*(env[i].cmy-cy) )
+                                              / (cubesize*cubesize) )
+                                    * env[i].weight ) / 256;
+                  weightsum := weightsum + spatialweight;
+                  coeff := coeff + env[i].cfactor * spatialweight;
+                end;
+                if weightsum <> 0 then
+                  coeff := coeff / weightsum // pixel manipulation coefficient
+                else
+                  coeff := 1;
+                P[x  ] := min(255,round(100*coeff));
+                P[x+1] := min(255,round(100*coeff));
+                P[x+2] := min(255,round(100*coeff));
+            end; // for cx
+          end; // for cy
+
+
+          if assigned(OUT_RAW_BALANCED_LAYER) then
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break; // index out of range
+            P := OUT_RAW_BALANCED_LAYER.ScanLine[by*cubesize+cy];
+            if UseMaskLayer then M := mask.ScanLine[by*cubesize+cy];
+
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break; // index out of range
+              x := x * 3;
+
+              // calculate per-pixel correction factor
+                weightsum := 0; coeff := 0;
+                for i := 0 to ecur -1 do // loop over all cubes in the environment
+                begin
+                  spatialweight := ( exp(-1.5*( (env[i].cmx-cx)*(env[i].cmx-cx) +
+                                                (env[i].cmy-cy)*(env[i].cmy-cy) )
+                                              / (cubesize*cubesize) )
+                                    * env[i].weight ) / 256;
+                  weightsum := weightsum + spatialweight;
+                  coeff := coeff + env[i].cfactor * spatialweight;
+                end;
+                coeff := coeff / weightsum; // pixel manipulation coefficient
+                P[x  ] := min(255, round(P[x  ]*coeff) );
+                P[x+1] := min(255, round(P[x+1]*coeff) );
+                P[x+2] := min(255, round(P[x+2]*coeff) );
+            end; // for cx
+          end; // for cy
+
+        end; // if CubesWithinRange()
+
+      end; // for bx
+    end; // for by
+
+  // cleanup
+  grid.Destroy; // my work here is done.
+end;
+
+
+
+
+
+function ExecuteFilterAction( image: TBitmap;
+                              var Filter: TFilterInstruction;
+                              LookupByIDFunc: TLookupBitmapFunc = nil) : Boolean;
+var
+  tmp, CoeffBitmap, RawBitmap: TBitmap;
+  fp: PStandardFilterParameters;
+  m : TMemoryStream;
+begin
+  result := false;
+  case Filter.FilterID of
+    FT_CHROMINANCE    : result := ChrominanceFilter(image,Filter.FilterData, Filter.FilterDataSize);
+
+    FT_DEPLETE_COLORS : result := DepleteColorsFilter(image,Filter.FilterData, Filter.FilterDataSize);
+
+    FT_INVERT         : result := InvertFilter(image,Filter.FilterData, Filter.FilterDataSize);
+
+    FT_BRIGHTNESS_AND_CONTRAST:
+      begin
+        BrightnessAndContrast(image,image.Canvas.ClipRect,
+        PStandardFilterParameters(Filter.FilterData)^.s1,
+        PStandardFilterParameters(Filter.FilterData)^.i1);
+        result := true;
+      end;
+
+    FT_BRIGHTNESS_BALANCER:
+      begin
+        tmp := nil; m := nil;
+        fp := Filter.FilterData; // Datensatz steht zu Beginn der Datenstruktur
+
+        if fp^.bool4 then // mask data present
+        begin
+          tmp := TBitmap.Create;
+          m   := Filter.StreamObj;
+          m.Seek(SizeOf(TStandardFilterParameters),soFromBeginning);
+          tmp.LoadFromStream(m);
+          tmp.PixelFormat := pf24bit;
+        end;
+        // maybe use the integer values from the StanardFilterParameters record for coefficient and raw layer IDs
+        // but how to get those damn Bitmap objects from the layer manager? Solved using Layer IDs in i3, i4
+        if assigned(LookupByIDFunc) then
+        begin
+          CoeffBitmap := LookupByIDFunc(fp^.i3); // look up by layer ID
+          RawBitmap   := LookupByIDFunc(fp^.i4); // look up by layer ID
+        end
+        else
+        begin
+          CoeffBitmap := nil;
+          RawBitmap   := nil;
+        end;
+
+        BrightnessBalancer( image,       // source image
+                            tmp,         // mask image (stored for undo/redo, see above)
+                            fp^.i1,      // cubesize
+                            fp^.bool4,   // BOOL use mask layer?
+                            fp^.bool2,   // BOOL use 2nd order neighbourhood?
+                            fp^.bool3,   // BOOL use target brightness?
+                            fp^.i2,      // target brightness value
+                            fp^.r1,      // MaskThreshold
+                            fp^.r2,      // QuantileCenter
+                            fp^.r3,      // QuantileWidth
+                            CoeffBitmap, // fills this bitmap object with an illustration of the local balancing strength
+                            RawBitmap);  // balanced output ignoring the mask layer (visible cubes only)
+
+        if assigned(tmp) then tmp.Free;
+        if assigned(m)   then m.Seek(0,soFromBeginning); // rewind
+      end;
+
+  end; // case
+end;
+
+
+
+
+
+
+
+
+
+procedure BrightnessBalancerPercentileGraph( source: TBitmap;
+                                             graph: TBitmap;
+                                             mask: TBitmap;
+                                             area: TRect;
+                                             cubesize: integer;
+                                             MaskThreshold: byte;
+                                             IntervalCenter: byte;
+                                             IntervalWidth: byte;
+                                             targetedbrightness: integer;
+                                             multiscaled: boolean;
+                                             normalize: Boolean = true);
+var
+  orgx, orgy: integer;
+  cw, ch: integer; // client width, height
+  radius: integer;
+  acur, w, h, x, y, bx, by, GridHeight, GridWidth, cx,cy: integer;
+  P,M,Q: PByteArray;
+  a: Array[0..128*128] of Cardinal; // brightness values to be sorted
+  UseMaskLayer:Boolean;
+  scaley, offset: single;
+  tx, ty: integer;
+  pixel: Cardinal;
+  rgb: array[0..3] of byte absolute pixel;
+  v, fltidx: single;
+  ipart: integer;
+  scanY: integer;
+  LineDelta, Base, ThisX: longint;
+  ThisByte: Byte;
+begin
+    if multiscaled
+      then radius := 2
+      else radius := 1;
+
+    w := source.Width;
+    h := source.Height;
+    GridWidth := ceil(w / cubesize);
+    GridHeight := ceil(h / cubesize);
+
+    UseMaskLayer := assigned(Mask);
+
+    graph.Canvas.Pen.Color   := clwhite;
+    graph.Canvas.Brush.Color := clwhite;
+    graph.Canvas.Rectangle(rect(area.Left -16, area.Top-4, area.Right+16, area.Bottom+10));
+
+    graph.Canvas.Pen.Color   := clblack;
+    graph.Canvas.Brush.Color := clblack;
+    graph.Canvas.FrameRect(area);
+
+    graph.Canvas.Pen.Color   := clgray;
+    graph.Canvas.Brush.Color := clwhite;
+
+    graph.Canvas.Pen.Width := 3;
+
+    graph.Canvas.MoveTo(  area.Right+1,
+                          area.Bottom-targetedbrightness*3);
+    graph.Canvas.LineTo(  area.Right+1+12,
+                          area.Bottom-targetedbrightness*3+5);
+    graph.Canvas.LineTo(  area.Right+1+12,
+                          area.Bottom-targetedbrightness*3-5);
+    graph.Canvas.LineTo(  area.Right+1,
+                          area.Bottom-targetedbrightness*3);
+
+    graph.Canvas.MoveTo(  area.left-1,
+                          area.Bottom-targetedbrightness*3);
+    graph.Canvas.LineTo(  area.left-1-12,
+                          area.Bottom-targetedbrightness*3+5);
+    graph.Canvas.LineTo(  area.left-1-12,
+                          area.Bottom-targetedbrightness*3-5);
+    graph.Canvas.LineTo(  area.left-1,
+                          area.Bottom-targetedbrightness*3);
+
+    graph.Canvas.MoveTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter-IntervalWidth/2)/100),
+                          area.Bottom+1-6);
+    graph.Canvas.LineTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter-IntervalWidth/2)/100),
+                          area.Bottom+1+6);
+
+    graph.Canvas.MoveTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter-IntervalWidth/2)/100),
+                          area.Bottom+1);
+    graph.Canvas.LineTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter+IntervalWidth/2)/100),
+                          area.Bottom+1);
+
+    graph.Canvas.MoveTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter+IntervalWidth/2)/100),
+                          area.Bottom+1-6);
+    graph.Canvas.LineTo(  area.Left+ round((area.Right - area.Left)*(IntervalCenter+IntervalWidth/2)/100),
+                          area.Bottom+1+6);
+
+
+    graph.Canvas.Pen.Width := 1;
+
+
+    // grid filling algorithm - reused
+    for by := 0 to GridHeight - 1 do
+    begin
+
+      for bx := 0 to GridWidth - 1 do
+      begin
+        // analyse cube[cx,cy]
+
+        acur := 0;
+
+        if UseMaskLayer then
+        begin
+          // obtain cube pixel brightness values
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break;
+            P := source.ScanLine[by*cubesize+cy];
+            M := mask.ScanLine[by*cubesize+cy];
+
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break;
+              x := x * 3;
+              if (M[x  ] >= MaskThreshold) or
+                 (M[x+1] >= MaskThreshold) or
+                 (M[x+2] >= MaskThreshold) then // improve by using weighting function (1 - gradientstrength of img) -> surpress areas with high contrast
+              begin
+                a[acur] := P[x] + P[x+1] + P[x+2]; // simplified brightness value
+                acur := acur +1;
+              end;
+            end;
+          end;
+        end
+        else // don't use mask layer
+        begin
+          // almost the same as above
+          for cy := 0 to cubesize -1 do
+          begin
+            if by*cubesize+cy = h then break;
+            P := source.ScanLine[by*cubesize+cy];
+            // if UseMaskLayer then M := mask.ScanLine[by*cubesize+cy];
+
+            for cx := 0 to cubesize -1 do
+            begin
+              x := (cx + bx*cubesize);
+              if x = w then break;
+              x := x * 3;
+              a[acur] := P[x] + P[x+1] + P[x+2]; // simplified brightness value
+              acur := acur +1;
+            end;
+          end;
+        end;
+
+        // cube data is acquired
+        if acur > 0 then
+        begin
+          if acur > 1 then
+          begin
+            SortCardinalData(@a[0],acur);
+            scaley := 1; offset := 0;
+            if normalize then
+            begin
+              if a[0] <> a[acur-1] then scaley := (Area.Bottom - Area.Top)/(a[acur-1]-a[0]);
+              offset := a[0];
+            end;
+
+            // begin drawing
+            if (Graph.Height < 2) then exit;
+            Q := Graph.ScanLine[0];
+            Base      := Cardinal(@Q[0]);
+            Q := Graph.ScanLine[1];
+            LineDelta := Longint(@Q[0])-Base;
+
+            if acur > (Area.Right - Area.Left) then
+            begin // draw only once per column
+              for x := 0 to (Area.Right - Area.Left)-1 do
+              begin
+                tx := Area.Left+x;
+                ty := Area.Bottom -1- round( (a[round((acur-1)*x/(Area.Right - Area.Left-1)) ]-offset) * scaley);
+
+                {pixel := graph.Canvas.Pixels[tx, ty];
+                rgb[0] := rgb[0]*95 div 100;
+                rgb[1] := rgb[0];
+                rgb[2] := rgb[0];
+                graph.Canvas.Pixels[tx, ty] := pixel; }
+                Q := Pointer(Base+ty*LineDelta);
+                ThisX := tx * 3;
+                ThisByte := round(Q[ThisX] * 0.95);
+                Q[ThisX] := ThisByte;
+                Q[ThisX+1] := ThisByte;
+                Q[ThisX+2] := ThisByte;
+              end;
+            end
+            else
+            begin // interpolate
+              for x := 0 to (Area.Right - Area.Left)-1 do
+              begin
+                fltidx := ((acur-1)*x/(Area.Right - Area.Left-1));
+                ipart := floor(fltidx);
+                v := a[ipart+1]*(fltidx-ipart) + a[ipart]*(1-(fltidx-ipart));
+                tx := Area.Left+x;
+                ty := Area.Bottom -1- round( (v-offset) * scaley);
+
+                {pixel := graph.Canvas.Pixels[tx, ty];
+                rgb[0] := rgb[0]*95 div 100;
+                rgb[1] := rgb[0];
+                rgb[2] := rgb[0];
+                graph.Canvas.Pixels[tx, ty] := pixel; }
+
+                Q := Pointer(Base+ty*LineDelta);
+                ThisX := tx * 3;
+                ThisByte := round(Q[ThisX] * 0.95);
+                Q[ThisX] := ThisByte;
+                Q[ThisX+1] := ThisByte;
+                Q[ThisX+2] := ThisByte;
+              end;
+            end;
+
+          end;
+
+        end;
+
+      end; // for bx
+    end; // for by
+
+
+end;
+
+
+
+end.

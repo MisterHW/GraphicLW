@@ -1,0 +1,3480 @@
+<xmlsheet>
+
+<!-- xml lens correction database - exported by GraphicLW v1  28.09.2011 [ 0: 0: 1- 729] -->
+
+	<entry name=" --- no distortion correction --- " >
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>0</minfocallength>
+			<maxfocallength>100000</maxfocallength>
+			<cropfactor>1,6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<set name="identity transformation" >
+					<rangestart>0</rangestart>
+					<rangeend>100000</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+					</coefficients>
+				</set>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF-S 10-22mm f/3.5-4.5 USM [1.6]" >
+		<camera>
+			<cameratype>canonEfsSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>10</minfocallength>
+			<maxfocallength>22</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [10 .. 11]" >
+					<rangestart>10</rangestart>
+					<rangeend>11</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005371</b>
+						<c>-0.018303</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [11 .. 13]" >
+					<rangestart>11</rangestart>
+					<rangeend>13</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002619</b>
+						<c>-0.009527</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [13 .. 15,5]" >
+					<rangestart>13</rangestart>
+					<rangeend>15,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002896</b>
+						<c>-0.007050</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [15,5 .. 18,5]" >
+					<rangestart>15,5</rangestart>
+					<rangeend>18,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005115</b>
+						<c>-0.010326</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [18,5 .. 21]" >
+					<rangestart>18,5</rangestart>
+					<rangeend>21</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005120</b>
+						<c>-0.008414</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [21 .. 22]" >
+					<rangestart>21</rangestart>
+					<rangeend>22</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002769</b>
+						<c>-0.004058</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 16-35mm f/2.8L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>16</minfocallength>
+			<maxfocallength>35</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [16 .. 16,5]" >
+					<rangestart>16</rangestart>
+					<rangeend>16,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.023824</b>
+						<c>-0.058145</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [16,5 .. 18,5]" >
+					<rangestart>16,5</rangestart>
+					<rangeend>18,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.022268</b>
+						<c>-0.051156</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [18,5 .. 21]" >
+					<rangestart>18,5</rangestart>
+					<rangeend>21</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.020609</b>
+						<c>-0.044077</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [21 .. 23]" >
+					<rangestart>21</rangestart>
+					<rangeend>23</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.017670</b>
+						<c>-0.036082</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [23 .. 25]" >
+					<rangestart>23</rangestart>
+					<rangeend>25</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.016895</b>
+						<c>-0.032578</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25 .. 28]" >
+					<rangestart>25</rangestart>
+					<rangeend>28</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.012716</b>
+						<c>-0.021973</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [28 .. 31,5]" >
+					<rangestart>28</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.010184</b>
+						<c>-0.016286</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 34]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>34</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007650</b>
+						<c>-0.009960</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [34 .. 35]" >
+					<rangestart>34</rangestart>
+					<rangeend>35</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007164</b>
+						<c>-0.010358</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 17-35mm f/2.8L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>17</minfocallength>
+			<maxfocallength>35</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [17 .. 17,5]" >
+					<rangestart>17</rangestart>
+					<rangeend>17,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.020618</b>
+						<c>-0.051946</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [17,5 .. 19]" >
+					<rangestart>17,5</rangestart>
+					<rangeend>19</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.022989</b>
+						<c>-0.054039</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [19 .. 21]" >
+					<rangestart>19</rangestart>
+					<rangeend>21</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.021786</b>
+						<c>-0.050249</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [21 .. 23]" >
+					<rangestart>21</rangestart>
+					<rangeend>23</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.017850</b>
+						<c>-0.039447</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [23 .. 25,5]" >
+					<rangestart>23</rangestart>
+					<rangeend>25,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.015392</b>
+						<c>-0.032541</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25,5 .. 28,5]" >
+					<rangestart>25,5</rangestart>
+					<rangeend>28,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.012041</b>
+						<c>-0.022894</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [28,5 .. 32,5]" >
+					<rangestart>28,5</rangestart>
+					<rangeend>32,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.008656</b>
+						<c>-0.014270</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [32,5 .. 35]" >
+					<rangestart>32,5</rangestart>
+					<rangeend>35</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.006328</b>
+						<c>-0.008464</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 17-40mm f/4L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>17</minfocallength>
+			<maxfocallength>40</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [17 .. 18]" >
+					<rangestart>17</rangestart>
+					<rangeend>18</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.020104</b>
+						<c>-0.047886</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [18 .. 19,5]" >
+					<rangestart>18</rangestart>
+					<rangeend>19,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.016917</b>
+						<c>-0.039854</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [19,5 .. 21]" >
+					<rangestart>19,5</rangestart>
+					<rangeend>21</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.015352</b>
+						<c>-0.035125</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [21 .. 23]" >
+					<rangestart>21</rangestart>
+					<rangeend>23</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.013520</b>
+						<c>-0.027379</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [23 .. 25]" >
+					<rangestart>23</rangestart>
+					<rangeend>25</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.012744</b>
+						<c>-0.024334</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25 .. 27]" >
+					<rangestart>25</rangestart>
+					<rangeend>27</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.012023</b>
+						<c>-0.021580</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [27 .. 30]" >
+					<rangestart>27</rangestart>
+					<rangeend>30</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.008491</b>
+						<c>-0.013858</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [30 .. 33,5]" >
+					<rangestart>30</rangestart>
+					<rangeend>33,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007181</b>
+						<c>-0.008983</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [33,5 .. 36]" >
+					<rangestart>33,5</rangestart>
+					<rangeend>36</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.006829</b>
+						<c>-0.007622</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [36 .. 38,5]" >
+					<rangestart>36</rangestart>
+					<rangeend>38,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.006676</b>
+						<c>-0.007544</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [38,5 .. 40]" >
+					<rangestart>38,5</rangestart>
+					<rangeend>40</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.004640</b>
+						<c>-0.003826</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF-S 17-85mm f/4-5.6 IS USM [1.6]" >
+		<camera>
+			<cameratype>canonEfsSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>17</minfocallength>
+			<maxfocallength>85</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [17 .. 18,5]" >
+					<rangestart>17</rangestart>
+					<rangeend>18,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.021181</b>
+						<c>-0.055581</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [18,5 .. 21]" >
+					<rangestart>18,5</rangestart>
+					<rangeend>21</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.019344</b>
+						<c>-0.043786</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [21 .. 25]" >
+					<rangestart>21</rangestart>
+					<rangeend>25</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.015491</b>
+						<c>-0.026682</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25 .. 29]" >
+					<rangestart>25</rangestart>
+					<rangeend>29</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.008084</b>
+						<c>-0.007472</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [29 .. 32,5]" >
+					<rangestart>29</rangestart>
+					<rangeend>32,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005522</b>
+						<c>-0.001763</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [32,5 .. 39,5]" >
+					<rangestart>32,5</rangestart>
+					<rangeend>39,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003149</b>
+						<c>0.002207</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [39,5 .. 48,5]" >
+					<rangestart>39,5</rangestart>
+					<rangeend>48,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008269</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [48,5 .. 57]" >
+					<rangestart>48,5</rangestart>
+					<rangeend>57</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008792</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [57 .. 66,5]" >
+					<rangestart>57</rangestart>
+					<rangeend>66,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007380</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [66,5 .. 75]" >
+					<rangestart>66,5</rangestart>
+					<rangeend>75</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.006226</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [75 .. 81,5]" >
+					<rangestart>75</rangestart>
+					<rangeend>81,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007095</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [81,5 .. 85]" >
+					<rangestart>81,5</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007288</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF-S 18-55mm f/3.5-5.6 [1.6]" >
+		<camera>
+			<cameratype>canonEfsSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>18</minfocallength>
+			<maxfocallength>55</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [18 .. 19,5]" >
+					<rangestart>18</rangestart>
+					<rangeend>19,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1.02</a>
+						<b>-0.077</b>
+						<c>0.005</c>
+						<d>0.004</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [19,5 .. 22,5]" >
+					<rangestart>19,5</rangestart>
+					<rangeend>22,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004255</c>
+						<d>-0.038513</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [22,5 .. 25,5]" >
+					<rangestart>22,5</rangestart>
+					<rangeend>25,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.000965</c>
+						<d>-0.019793</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25,5 .. 28,5]" >
+					<rangestart>25,5</rangestart>
+					<rangeend>28,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001701</c>
+						<d>-0.014516</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [28,5 .. 31,5]" >
+					<rangestart>28,5</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003199</c>
+						<d>-0.012047</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 35]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>35</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000034</c>
+						<d>-0.005236</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [35 .. 39]" >
+					<rangestart>35</rangestart>
+					<rangeend>39</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005560</c>
+						<d>-0.016032</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [39 .. 43]" >
+					<rangestart>39</rangestart>
+					<rangeend>43</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001585</c>
+						<d>-0.007594</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [43 .. 46,5]" >
+					<rangestart>43</rangestart>
+					<rangeend>46,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005770</c>
+						<d>-0.015688</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [46,5 .. 50,5]" >
+					<rangestart>46,5</rangestart>
+					<rangeend>50,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001543</c>
+						<d>-0.003821</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [50,5 .. 54]" >
+					<rangestart>50,5</rangestart>
+					<rangeend>54</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.001301</c>
+						<d>0.001515</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [54 .. 55]" >
+					<rangestart>54</rangestart>
+					<rangeend>55</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000426</c>
+						<d>-0.001817</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24-70mm f/2.8L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>70</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 25,5]" >
+					<rangestart>24</rangestart>
+					<rangeend>25,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.015298</b>
+						<c>-0.039413</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [25,5 .. 28,5]" >
+					<rangestart>25,5</rangestart>
+					<rangeend>28,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.014041</b>
+						<c>-0.034436</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [28,5 .. 32]" >
+					<rangestart>28,5</rangestart>
+					<rangeend>32</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.013341</b>
+						<c>-0.031051</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [32 .. 36]" >
+					<rangestart>32</rangestart>
+					<rangeend>36</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.006539</b>
+						<c>-0.015390</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [36 .. 40,5]" >
+					<rangestart>36</rangestart>
+					<rangeend>40,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003138</b>
+						<c>-0.007742</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [40,5 .. 45,5]" >
+					<rangestart>40,5</rangestart>
+					<rangeend>45,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000233</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [45,5 .. 51,5]" >
+					<rangestart>45,5</rangestart>
+					<rangeend>51,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001510</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [51,5 .. 59,5]" >
+					<rangestart>51,5</rangestart>
+					<rangeend>59,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003988</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [59,5 .. 67]" >
+					<rangestart>59,5</rangestart>
+					<rangeend>67</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005787</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [67 .. 70]" >
+					<rangestart>67</rangestart>
+					<rangeend>70</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.006294</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24-85mm f/3.5-4.5 USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>85</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 26]" >
+					<rangestart>24</rangestart>
+					<rangeend>26</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005763</b>
+						<c>-0.022311</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [26 .. 31,5]" >
+					<rangestart>26</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002537</b>
+						<c>-0.010740</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 41,5]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>41,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000000</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [41,5 .. 59]" >
+					<rangestart>41,5</rangestart>
+					<rangeend>59</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004254</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [59 .. 77,5]" >
+					<rangestart>59</rangestart>
+					<rangeend>77,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005312</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [77,5 .. 85]" >
+					<rangestart>77,5</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004512</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 28-70mm f/2.8L [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>28</minfocallength>
+			<maxfocallength>70</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [28 .. 30]" >
+					<rangestart>28</rangestart>
+					<rangeend>30</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001744</b>
+						<c>0.000657</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [30 .. 33,5]" >
+					<rangestart>30</rangestart>
+					<rangeend>33,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003058</b>
+						<c>-0.013232</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [33,5 .. 37]" >
+					<rangestart>33,5</rangestart>
+					<rangeend>37</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.004696</b>
+						<c>0.007063</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [37 .. 41,5]" >
+					<rangestart>37</rangestart>
+					<rangeend>41,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000110</b>
+						<c>-0.002166</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [41,5 .. 47]" >
+					<rangestart>41,5</rangestart>
+					<rangeend>47</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001271</b>
+						<c>0.001861</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [47 .. 55]" >
+					<rangestart>47</rangestart>
+					<rangeend>55</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.006466</b>
+						<c>0.014612</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [55 .. 65]" >
+					<rangestart>55</rangestart>
+					<rangeend>65</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001227</b>
+						<c>0.003723</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [65 .. 70]" >
+					<rangestart>65</rangestart>
+					<rangeend>70</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001929</b>
+						<c>0.005136</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24-105mm f/4L IS USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>105</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 26]" >
+					<rangestart>24</rangestart>
+					<rangeend>26</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.017263</b>
+						<c>-0.049244</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [26 .. 31,5]" >
+					<rangestart>26</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.010878</b>
+						<c>-0.024454</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 42,5]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>42,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007152</b>
+						<c>-0.009799</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [42,5 .. 60]" >
+					<rangestart>42,5</rangestart>
+					<rangeend>60</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002502</b>
+						<c>0.004803</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [60 .. 79]" >
+					<rangestart>60</rangestart>
+					<rangeend>79</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.009685</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [79 .. 96,5]" >
+					<rangestart>79</rangestart>
+					<rangeend>96,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008781</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [96,5 .. 105]" >
+					<rangestart>96,5</rangestart>
+					<rangeend>105</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.009598</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24-105mm f/4L IS USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>105</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 26]" >
+					<rangestart>24</rangestart>
+					<rangeend>26</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005520</b>
+						<c>-0.020740</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [26 .. 31,5]" >
+					<rangestart>26</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003960</b>
+						<c>-0.014570</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 42,5]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>42,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000910</b>
+						<c>-0.001710</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [42,5 .. 60]" >
+					<rangestart>42,5</rangestart>
+					<rangeend>60</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000770</b>
+						<c>0.000960</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [60 .. 79]" >
+					<rangestart>60</rangestart>
+					<rangeend>79</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001600</b>
+						<c>0.000050</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [79 .. 96,5]" >
+					<rangestart>79</rangestart>
+					<rangeend>96,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.004670</b>
+						<c>-0.006240</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [96,5 .. 105]" >
+					<rangestart>96,5</rangestart>
+					<rangeend>105</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007970</b>
+						<c>-0.013070</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 28-105mm f/3.5-4.5 II USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>28</minfocallength>
+			<maxfocallength>105</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [28 .. 31,5]" >
+					<rangestart>28</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.013305</b>
+						<c>-0.039730</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 42,5]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>42,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.005643</b>
+						<c>-0.012771</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [42,5 .. 60]" >
+					<rangestart>42,5</rangestart>
+					<rangeend>60</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007781</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [60 .. 87,5]" >
+					<rangestart>60</rangestart>
+					<rangeend>87,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.010884</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [87,5 .. 105]" >
+					<rangestart>87,5</rangestart>
+					<rangeend>105</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.011749</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 28-300mm f/3.5-5.6L IS USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>28</minfocallength>
+			<maxfocallength>300</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [28 .. 31,5]" >
+					<rangestart>28</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.013512</b>
+						<c>-0.044163</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 37,5]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>37,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.008844</b>
+						<c>-0.017730</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [37,5 .. 50]" >
+					<rangestart>37,5</rangestart>
+					<rangeend>50</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008261</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [50 .. 65]" >
+					<rangestart>50</rangestart>
+					<rangeend>65</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.012093</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [65 .. 87,5]" >
+					<rangestart>65</rangestart>
+					<rangeend>87,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.012516</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [87,5 .. 120]" >
+					<rangestart>87,5</rangestart>
+					<rangeend>120</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.009065</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [120 .. 167,5]" >
+					<rangestart>120</rangestart>
+					<rangeend>167,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008196</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [167,5 .. 250]" >
+					<rangestart>167,5</rangestart>
+					<rangeend>250</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007773</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [250 .. 300]" >
+					<rangestart>250</rangestart>
+					<rangeend>300</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008177</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 28-135mm f/3.5-5.6 IS USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>28</minfocallength>
+			<maxfocallength>135</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [28 .. 31,5]" >
+					<rangestart>28</rangestart>
+					<rangeend>31,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.015307</b>
+						<c>-0.042304</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [31,5 .. 38]" >
+					<rangestart>31,5</rangestart>
+					<rangeend>38</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.009116</b>
+						<c>-0.020624</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [38 .. 47]" >
+					<rangestart>38</rangestart>
+					<rangeend>47</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003439</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [47 .. 56,5]" >
+					<rangestart>47</rangestart>
+					<rangeend>56,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008157</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [56,5 .. 65]" >
+					<rangestart>56,5</rangestart>
+					<rangeend>65</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008848</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [65 .. 77,5]" >
+					<rangestart>65</rangestart>
+					<rangeend>77,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.009719</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [77,5 .. 92,5]" >
+					<rangestart>77,5</rangestart>
+					<rangeend>92,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.009196</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [92,5 .. 108,5]" >
+					<rangestart>92,5</rangestart>
+					<rangeend>108,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008576</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [108,5 .. 126]" >
+					<rangestart>108,5</rangestart>
+					<rangeend>126</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.010397</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [126 .. 135]" >
+					<rangestart>126</rangestart>
+					<rangeend>135</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.010546</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35-70mm f/3.5-4.5 [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>70</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 38,5]" >
+					<rangestart>35</rangestart>
+					<rangeend>38,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.005023</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [38,5 .. 49]" >
+					<rangestart>38,5</rangestart>
+					<rangeend>49</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002793</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [49 .. 63]" >
+					<rangestart>49</rangestart>
+					<rangeend>63</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000982</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [63 .. 70]" >
+					<rangestart>63</rangestart>
+					<rangeend>70</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001993</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35-80mm f/4-5.6 III [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>80</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 37,5]" >
+					<rangestart>35</rangestart>
+					<rangeend>37,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003148</b>
+						<c>-0.013071</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [37,5 .. 42]" >
+					<rangestart>37,5</rangestart>
+					<rangeend>42</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004903</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [42 .. 48,5]" >
+					<rangestart>42</rangestart>
+					<rangeend>48,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002625</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [48,5 .. 59]" >
+					<rangestart>48,5</rangestart>
+					<rangeend>59</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000335</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [59 .. 72,5]" >
+					<rangestart>59</rangestart>
+					<rangeend>72,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.002145</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [72,5 .. 80]" >
+					<rangestart>72,5</rangestart>
+					<rangeend>80</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007040</b>
+						<c>0.002809</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35-105mm f/3.5-4.5 [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>105</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 40]" >
+					<rangestart>35</rangestart>
+					<rangeend>40</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003118</b>
+						<c>-0.013401</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [40 .. 52,5]" >
+					<rangestart>40</rangestart>
+					<rangeend>52,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003039</b>
+						<c>-0.007423</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [52,5 .. 71]" >
+					<rangestart>52,5</rangestart>
+					<rangeend>71</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001309</b>
+						<c>0.000252</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [71 .. 93,5]" >
+					<rangestart>71</rangestart>
+					<rangeend>93,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001085</b>
+						<c>0.002214</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [93,5 .. 105]" >
+					<rangestart>93,5</rangestart>
+					<rangeend>105</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000575</b>
+						<c>0.003503</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35-135mm f/4-5.6 USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>135</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 40]" >
+					<rangestart>35</rangestart>
+					<rangeend>40</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001862</b>
+						<c>-0.007763</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [40 .. 55]" >
+					<rangestart>40</rangestart>
+					<rangeend>55</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001004</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [55 .. 72,5]" >
+					<rangestart>55</rangestart>
+					<rangeend>72,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004211</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [72,5 .. 85,5]" >
+					<rangestart>72,5</rangestart>
+					<rangeend>85,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004364</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [85,5 .. 100,5]" >
+					<rangestart>85,5</rangestart>
+					<rangeend>100,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005026</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [100,5 .. 122,5]" >
+					<rangestart>100,5</rangestart>
+					<rangeend>122,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005453</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [122,5 .. 135]" >
+					<rangestart>122,5</rangestart>
+					<rangeend>135</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003708</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 55-200mm f/4.5-5.6 [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>55</minfocallength>
+			<maxfocallength>200</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [55 .. 60]" >
+					<rangestart>55</rangestart>
+					<rangeend>60</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.002904</b>
+						<c>0.003678</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [60 .. 70]" >
+					<rangestart>60</rangestart>
+					<rangeend>70</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.004584</b>
+						<c>0.008401</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [70 .. 81,5]" >
+					<rangestart>70</rangestart>
+					<rangeend>81,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.000913</b>
+						<c>0.001853</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [81,5 .. 96,5]" >
+					<rangestart>81,5</rangestart>
+					<rangeend>96,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.002182</b>
+						<c>0.007163</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [96,5 .. 117,5]" >
+					<rangestart>96,5</rangestart>
+					<rangeend>117,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.002465</b>
+						<c>0.008767</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [117,5 .. 137,5]" >
+					<rangestart>117,5</rangestart>
+					<rangeend>137,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.003219</b>
+						<c>0.010958</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [137,5 .. 152,5]" >
+					<rangestart>137,5</rangestart>
+					<rangeend>152,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.003261</b>
+						<c>0.011157</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [152,5 .. 180]" >
+					<rangestart>152,5</rangestart>
+					<rangeend>180</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.003477</b>
+						<c>0.011918</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [180 .. 200]" >
+					<rangestart>180</rangestart>
+					<rangeend>200</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.006020</b>
+						<c>0.017552</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 70-200mm f/2.8L IS USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>70</minfocallength>
+			<maxfocallength>200</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [70 .. 71,5]" >
+					<rangestart>70</rangestart>
+					<rangeend>71,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.009135</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [71,5 .. 75,5]" >
+					<rangestart>71,5</rangestart>
+					<rangeend>75,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.008769</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [75,5 .. 79]" >
+					<rangestart>75,5</rangestart>
+					<rangeend>79</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.006965</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [79 .. 85]" >
+					<rangestart>79</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.005047</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [85 .. 95]" >
+					<rangestart>85</rangestart>
+					<rangeend>95</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.000959</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [95 .. 107,5]" >
+					<rangestart>95</rangestart>
+					<rangeend>107,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000290</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [107,5 .. 122,5]" >
+					<rangestart>107,5</rangestart>
+					<rangeend>122,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.002667</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [122,5 .. 137,5]" >
+					<rangestart>122,5</rangestart>
+					<rangeend>137,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004312</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [137,5 .. 152,5]" >
+					<rangestart>137,5</rangestart>
+					<rangeend>152,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004809</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [152,5 .. 165]" >
+					<rangestart>152,5</rangestart>
+					<rangeend>165</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005218</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [165 .. 177,5]" >
+					<rangestart>165</rangestart>
+					<rangeend>177,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.006153</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [177,5 .. 192,5]" >
+					<rangestart>177,5</rangestart>
+					<rangeend>192,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.006109</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [192,5 .. 200]" >
+					<rangestart>192,5</rangestart>
+					<rangeend>200</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008631</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 70-200mm f/2.8L IS USM + EF 1.4x ext [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>98</minfocallength>
+			<maxfocallength>280</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [98 .. 101,5]" >
+					<rangestart>98</rangestart>
+					<rangeend>101,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.012279</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [101,5 .. 107,5]" >
+					<rangestart>101,5</rangestart>
+					<rangeend>107,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.012117</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [107,5 .. 115]" >
+					<rangestart>107,5</rangestart>
+					<rangeend>115</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.011447</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [115 .. 127,5]" >
+					<rangestart>115</rangestart>
+					<rangeend>127,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.010878</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [127,5 .. 140]" >
+					<rangestart>127,5</rangestart>
+					<rangeend>140</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.008040</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [140 .. 152,5]" >
+					<rangestart>140</rangestart>
+					<rangeend>152,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.008860</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [152,5 .. 172,5]" >
+					<rangestart>152,5</rangestart>
+					<rangeend>172,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.007060</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [172,5 .. 202,5]" >
+					<rangestart>172,5</rangestart>
+					<rangeend>202,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.006693</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [202,5 .. 232,5]" >
+					<rangestart>202,5</rangestart>
+					<rangeend>232,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.006125</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [232,5 .. 262,5]" >
+					<rangestart>232,5</rangestart>
+					<rangeend>262,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004999</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [262,5 .. 280]" >
+					<rangestart>262,5</rangestart>
+					<rangeend>280</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004683</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 70-200mm f/4L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>70</minfocallength>
+			<maxfocallength>200</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [70 .. 72,5]" >
+					<rangestart>70</rangestart>
+					<rangeend>72,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.006408</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [72,5 .. 78]" >
+					<rangestart>72,5</rangestart>
+					<rangeend>78</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.005162</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [78 .. 87,5]" >
+					<rangestart>78</rangestart>
+					<rangeend>87,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.003271</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [87,5 .. 97]" >
+					<rangestart>87,5</rangestart>
+					<rangeend>97</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000642</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [97 .. 104,5]" >
+					<rangestart>97</rangestart>
+					<rangeend>104,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.002069</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [104,5 .. 115,5]" >
+					<rangestart>104,5</rangestart>
+					<rangeend>115,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003375</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [115,5 .. 128,5]" >
+					<rangestart>115,5</rangestart>
+					<rangeend>128,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004125</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [128,5 .. 140]" >
+					<rangestart>128,5</rangestart>
+					<rangeend>140</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.005898</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [140 .. 152]" >
+					<rangestart>140</rangestart>
+					<rangeend>152</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.006262</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [152 .. 163,5]" >
+					<rangestart>152</rangestart>
+					<rangeend>163,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.007369</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [163,5 .. 176]" >
+					<rangestart>163,5</rangestart>
+					<rangeend>176</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008619</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [176 .. 192]" >
+					<rangestart>176</rangestart>
+					<rangeend>192</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008464</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [192 .. 200]" >
+					<rangestart>192</rangestart>
+					<rangeend>200</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.008816</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 70-200mm f/4L USM + EF 1.4x ext [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>98</minfocallength>
+			<maxfocallength>280</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [98 .. 103,5]" >
+					<rangestart>98</rangestart>
+					<rangeend>103,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.011699</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [103,5 .. 113]" >
+					<rangestart>103,5</rangestart>
+					<rangeend>113</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.010575</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [113 .. 122]" >
+					<rangestart>113</rangestart>
+					<rangeend>122</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.008594</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [122 .. 133,5]" >
+					<rangestart>122</rangestart>
+					<rangeend>133,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.008167</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [133,5 .. 149]" >
+					<rangestart>133,5</rangestart>
+					<rangeend>149</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.007141</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [149 .. 167]" >
+					<rangestart>149</rangestart>
+					<rangeend>167</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.005869</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [167 .. 182,5]" >
+					<rangestart>167</rangestart>
+					<rangeend>182,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004860</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [182,5 .. 196]" >
+					<rangestart>182,5</rangestart>
+					<rangeend>196</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.005166</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [196 .. 212,5]" >
+					<rangestart>196</rangestart>
+					<rangeend>212,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004933</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [212,5 .. 228,5]" >
+					<rangestart>212,5</rangestart>
+					<rangeend>228,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004657</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [228,5 .. 257,5]" >
+					<rangestart>228,5</rangestart>
+					<rangeend>257,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004297</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [257,5 .. 280]" >
+					<rangestart>257,5</rangestart>
+					<rangeend>280</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002653</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 70-300mm f/4.5-5.6 DO IS USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>70</minfocallength>
+			<maxfocallength>300</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [70 .. 85]" >
+					<rangestart>70</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002373</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [85 .. 117,5]" >
+					<rangestart>85</rangestart>
+					<rangeend>117,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.002427</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [117,5 .. 217,5]" >
+					<rangestart>117,5</rangestart>
+					<rangeend>217,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.003712</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [217,5 .. 300]" >
+					<rangestart>217,5</rangestart>
+					<rangeend>300</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004302</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 75-300mm f/4-5.6 IS USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>75</minfocallength>
+			<maxfocallength>300</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [75 .. 87,5]" >
+					<rangestart>75</rangestart>
+					<rangeend>87,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004815</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [87,5 .. 117,5]" >
+					<rangestart>87,5</rangestart>
+					<rangeend>117,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.004914</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [117,5 .. 145]" >
+					<rangestart>117,5</rangestart>
+					<rangeend>145</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000475</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [145 .. 227,5]" >
+					<rangestart>145</rangestart>
+					<rangeend>227,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001105</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [227,5 .. 300]" >
+					<rangestart>227,5</rangestart>
+					<rangeend>300</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.004110</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 100-400mm f/4.5-5.6L IS USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>zoom</lenstype>
+			<minfocallength>100</minfocallength>
+			<maxfocallength>400</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [100 .. 117,5]" >
+					<rangestart>100</rangestart>
+					<rangeend>117,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001543</b>
+						<c>-0.003547</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [117,5 .. 142,5]" >
+					<rangestart>117,5</rangestart>
+					<rangeend>142,5</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000471</b>
+						<c>-0.000408</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [142,5 .. 175]" >
+					<rangestart>142,5</rangestart>
+					<rangeend>175</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000220</b>
+						<c>0.000681</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [175 .. 225]" >
+					<rangestart>175</rangestart>
+					<rangeend>225</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.000110</b>
+						<c>0.001920</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [225 .. 275]" >
+					<rangestart>225</rangestart>
+					<rangeend>275</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001326</b>
+						<c>-0.001117</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [275 .. 325]" >
+					<rangestart>275</rangestart>
+					<rangeend>325</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001773</b>
+						<c>0.005878</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [325 .. 375]" >
+					<rangestart>325</rangestart>
+					<rangeend>375</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000721</b>
+						<c>0.000672</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+				<geometricset name="set range [375 .. 400]" >
+					<rangestart>375</rangestart>
+					<rangeend>400</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.000338</b>
+						<c>0.003752</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 20mm f/2.8 USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>20</minfocallength>
+			<maxfocallength>20</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [20 .. 20]" >
+					<rangestart>20</rangestart>
+					<rangeend>20</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.018218</b>
+						<c>-0.040033</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24mm f/1.4L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>24</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 24]" >
+					<rangestart>24</rangestart>
+					<rangeend>24</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.013378</b>
+						<c>-0.028367</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 24mm f/2.8 [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>24</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 24]" >
+					<rangestart>24</rangestart>
+					<rangeend>24</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.017412</b>
+						<c>-0.039315</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 28mm f/2.8 [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>28</minfocallength>
+			<maxfocallength>28</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [28 .. 28]" >
+					<rangestart>28</rangestart>
+					<rangeend>28</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.003003</b>
+						<c>-0.011213</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35mm f/1.4L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>35</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 35]" >
+					<rangestart>35</rangestart>
+					<rangeend>35</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007937</b>
+						<c>-0.021832</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 35mm f/2.0 [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>35</minfocallength>
+			<maxfocallength>35</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [35 .. 35]" >
+					<rangestart>35</rangestart>
+					<rangeend>35</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.007768</b>
+						<c>-0.018685</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 50mm f/1.4 [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>50</minfocallength>
+			<maxfocallength>50</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [50 .. 50]" >
+					<rangestart>50</rangestart>
+					<rangeend>50</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002987</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 50mm f/1.4 [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>50</minfocallength>
+			<maxfocallength>50</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [50 .. 50]" >
+					<rangestart>50</rangestart>
+					<rangeend>50</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002615</b>
+						<c>-0.011230</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 50mm f/1.8 I and II [1.3]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>50</minfocallength>
+			<maxfocallength>50</maxfocallength>
+			<cropfactor>1.3</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [50 .. 50]" >
+					<rangestart>50</rangestart>
+					<rangeend>50</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.000160</b>
+						<c>-0.003951</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF-S 60mm f/2.8 Macro [1.6]" >
+		<camera>
+			<cameratype>canonEfsSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>60</minfocallength>
+			<maxfocallength>60</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [60 .. 60]" >
+					<rangestart>60</rangestart>
+					<rangeend>60</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000000</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 85mm f/1.2L USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>85</minfocallength>
+			<maxfocallength>85</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [85 .. 85]" >
+					<rangestart>85</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>-0.002140</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 85mm f/1.8 USM [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>85</minfocallength>
+			<maxfocallength>85</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [85 .. 85]" >
+					<rangestart>85</rangestart>
+					<rangeend>85</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.000989</b>
+						<c>-0.002335</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 100mm f/2.8 USM Macro [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>100</minfocallength>
+			<maxfocallength>100</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [100 .. 100]" >
+					<rangestart>100</rangestart>
+					<rangeend>100</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001889</b>
+						<c>-0.005706</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 100mm f/2.8 Macro [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>100</minfocallength>
+			<maxfocallength>100</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [100 .. 100]" >
+					<rangestart>100</rangestart>
+					<rangeend>100</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>-0.001558</b>
+						<c>0.004225</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 135mm f/2.8 Soft Focus [1.3]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>135</minfocallength>
+			<maxfocallength>135</maxfocallength>
+			<cropfactor>1.3</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [135 .. 135]" >
+					<rangestart>135</rangestart>
+					<rangeend>135</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.001266</b>
+						<c>0.001782</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon EF 200mm f/2.8L II USM [1.6]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>200</minfocallength>
+			<maxfocallength>200</maxfocallength>
+			<cropfactor>1.6</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [200 .. 200]" >
+					<rangestart>200</rangestart>
+					<rangeend>200</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.000502</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon TS-E 24mm f/3.5L [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>24</minfocallength>
+			<maxfocallength>24</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [24 .. 24]" >
+					<rangestart>24</rangestart>
+					<rangeend>24</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.006127</b>
+						<c>-0.018983</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon TS-E 45mm f/2.8 [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>45</minfocallength>
+			<maxfocallength>45</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [45 .. 45]" >
+					<rangestart>45</rangestart>
+					<rangeend>45</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.002110</b>
+						<c>-0.007388</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+	<entry name="Canon TS-E 90mm f/2.8 [1.0]" >
+		<camera>
+			<cameratype>canonSLR</cameratype>
+		</camera>
+		<focalparams>
+			<lenstype>fix</lenstype>
+			<minfocallength>90</minfocallength>
+			<maxfocallength>90</maxfocallength>
+			<cropfactor>1.0</cropfactor>
+		</focalparams>
+		<correction>
+			<geometricsets>
+				<geometricset name="set range [90 .. 90]" >
+					<rangestart>90</rangestart>
+					<rangeend>90</rangeend>
+					<convention>polynomial</convention>
+					<coefficients>
+						<a>1</a>
+						<b>0.000000</b>
+						<c>0.001333</c>
+						<d>0.000000</d>
+					</coefficients>
+				</geometricset>
+			</geometricsets>
+			<chromaticsets>
+			</chromaticsets>
+		</correction>
+	</entry>
+
+
+</xmlsheet>

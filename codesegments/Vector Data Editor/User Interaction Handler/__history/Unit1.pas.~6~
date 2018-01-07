@@ -1,0 +1,108 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls,
+  UIntHandler, GLWDef;
+
+
+
+type
+  TForm1 = class(TForm)
+    GroupBox1: TGroupBox;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
+    GroupBox2: TGroupBox;
+    Memo1: TMemo;
+    Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure Button7Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+  private
+    CurrentHandler: TUserInteractionHandler;
+  public
+    PointGroup: TPointGroup;
+    container : TMetaData;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  memo1.clear;
+  CurrentHandler := nil;
+
+  container  := TMetaData.Create;
+  PointGroup := TPointGroup.Create;
+  container.Add(PointGroup);
+end;
+
+
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  CurrentHandler := nil;
+end;
+
+procedure TForm1.Button7Click(Sender: TObject);
+begin
+  container.SaveToFile('container.xml');
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  container.Destroy;
+  PointGroup.Destroy;
+end;
+
+
+
+procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseDown(Sender, Button, Shift, X, Y);
+end;
+
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseMove(Sender, Shift, X, Y);
+end;
+
+procedure TForm1.FormMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseUp(Sender, Button, Shift, X, Y);
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  CurrentHandler := DefaultCreatePointHandler;
+end;
+
+
+
+
+end.

@@ -1,0 +1,266 @@
+unit VisualOverlayEx;
+
+interface
+uses
+  Windows, Controls, Types, Classes, Graphics,
+  MMXBLend, VisualOverlayClass,
+  Forms;
+
+
+
+type TVisualOverlayPanelEx = Class(TVisualOverlayPanel)
+    Constructor Create(ClientRect: TRect; Parent: TObject = nil; Screen:TBitmap = nil);
+    Destructor Destroy(); override;
+  private
+    VOHandler: TVisualOverlayHandler;
+
+  protected
+    procedure SetLeft(int : integer);  override;
+    procedure SetTop(int: integer);    override;
+    procedure SetWidth(int: integer);  override;
+    procedure SetHeight(int: integer); override;
+
+
+    procedure SetVisibility(IsVisible: Boolean);
+  public
+    Property Top    : integer read GetTop    write SetTop;  // reintroduce
+    property Left   : integer read getLeft   write SetLeft; // reintroduce
+    property Width  : integer read GetWidth  write SetWidth;
+    property Height : integer read Getheight write SetHeight;
+
+
+    procedure InsertComponent(vo:TVisualOverlayPanel);
+    procedure RemoveComponent(vo:TVisualOverlayPanel);
+
+    procedure Paint(Destination: TBitmap;
+                    AbsoluteOrigin: TPoint; CurrentScaling: single); override;
+
+    procedure SetBounds(bounds:TRect; parentarea: TRect); override;
+    procedure UpdateParentAreaChanges(clientrect: TRect); override;
+
+    procedure MouseDown(Sender: TObject; Button: TMouseButton;
+                  Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Sender: TObject;
+                  Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp  (Sender: TObject; Button: TMouseButton;
+                  Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseWheel(Sender: TObject; Shift: TShiftState;
+        WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean); override;
+end;
+
+
+implementation
+uses
+  SysUtils;
+
+
+Constructor TVisualOverlayPanelEx.Create(ClientRect: TRect; Parent: TObject; Screen:TBitmap);
+begin
+  inherited Create(ClientRect);
+
+  self.VOHandler := TVisualOverlayHandler.Create(screen);
+  self.VOHandler.Buffer := Screen;
+  self.VOHandler.SetReferenceRect(ClientRect);
+  self.VOHandler.Parent := self;
+end;
+
+
+
+Destructor TVisualOverlayPanelEx.Destroy();
+begin
+  VOHandler.Destroy;
+  inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.InsertComponent(vo:TVisualOverlayPanel);
+var
+  parentrect: TRect; // old parent rectangle
+begin
+  // show debugging frames
+  //if assigned(Application.Mainform) then
+  begin
+    parentrect.Left   := vo.Left - vo.Margin.Left;
+    parentrect.Right  := vo.Left + vo.Width  + vo.Margin.Right;
+    parentrect.Top    := vo.Top  - vo.Margin.Top;
+    parentrect.Bottom := vo.Top  + vo.Height + vo.Margin.Bottom;
+    {Application.MainForm.Canvas.Brush.Color := clred;
+    Application.MainForm.Canvas.FrameRect(parentrect);
+    Application.MainForm.Canvas.Brush.Color := clgreen;
+    Application.MainForm.Canvas.FrameRect(vo.BoundsRect);
+    Application.ProcessMessages;
+    sleep(200);}
+  end;
+
+  self.VOHandler.InsertVisualOverlayObject(vo);
+end;
+
+
+
+procedure TVisualOverlayPanelEx.RemoveComponent(vo:TVisualOverlayPanel);
+begin
+  self.VOHandler.surpressrepaint;
+  vo.UpdateParentAreaChanges(rect(0,0,1024,1024));
+  self.VOHandler.RemoveVisualOverlayObject(vo);
+end;
+
+
+procedure TVisualOverlayPanelEx.SetLeft(int : integer);
+var
+  shift: integer;
+begin
+  shift := int - self._boundsrect.Left;
+  _boundsrect.Left  := _boundsrect.Left  + shift;
+  _boundsrect.Right := _boundsrect.Right + shift;
+  _margin.Left      := _margin.Left  + shift;
+  _margin.Right     := _margin.Right - shift;
+
+  VOHandler.SetReferenceRect(BoundsRect);
+
+  if self.Visible then
+    if assigned(self.ParentRepaint) then ParentRepaint(self);
+end;
+
+
+
+procedure TVisualOverlayPanelEx.SetTop(int: integer);
+var
+  shift: integer;
+begin
+  shift := int - self._boundsrect.Top;
+  _boundsrect.Top    := _boundsrect.Top    + shift;
+  _boundsrect.Bottom := _boundsrect.Bottom + shift;
+  _margin.Top        := _margin.Top    + shift;
+  _margin.Bottom     := _margin.Bottom - shift;
+
+  VOHandler.SetReferenceRect(BoundsRect);
+
+  if self.Visible then
+    if assigned(self.ParentRepaint) then ParentRepaint(self);
+end;
+
+
+
+procedure TVisualOverlayPanelEx.Paint(Destination: TBitmap;
+                AbsoluteOrigin: TPoint; CurrentScaling: single);
+begin
+  inherited;
+  if self.Visible then VOHandler.ClientPaint(self);
+end;
+
+
+
+procedure TVisualOverlayPanelEx.MouseDown(Sender: TObject; Button: TMouseButton;
+                  Shift: TShiftState; X, Y: Integer);
+begin
+  if VOHandler.CanHandleMouseEvent(Point(X,Y),shift,button) then
+    VOHandler.ParentMouseDown(Sender,Button,Shift,X,Y)
+  else
+    inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.MouseMove(Sender: TObject;
+                  Shift: TShiftState; X, Y: Integer);
+begin
+  if VOHandler.CanHandleMouseEvent(Point(X,Y),shift) then
+    VOHandler.ParentMouseMove(Sender,Shift,X,Y)
+  else
+    inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.MouseUp  (Sender: TObject; Button: TMouseButton;
+                  Shift: TShiftState; X, Y: Integer);
+begin
+  if VOHandler.CanHandleMouseEvent(Point(X,Y),shift, Button) then
+    VOHandler.ParentMouseUp(Sender,Button, Shift,X,Y)
+  else
+    inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.MouseWheel(Sender: TObject; Shift: TShiftState;
+        WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+  if VOHandler.CanHandleMouseEvent(MousePos,shift) then
+    VOHandler.ParentMouseWheel(Sender,Shift,WheelDelta,MousePos,Handled)
+  else
+    inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.SetBounds(bounds:TRect; parentarea: TRect);
+begin
+  if assigned(VOHandler) then VOHandler.SetReferenceRect(bounds);
+  inherited;
+end;
+
+
+
+procedure TVisualOverlayPanelEx.UpdateParentAreaChanges(clientrect: TRect);
+begin
+  inherited;
+  if assigned(VOHandler) then VOHandler.SetReferenceRect(BoundsRect);
+end;
+
+
+procedure TVisualOverlayPanelEx.SetVisibility(IsVisible: Boolean);
+begin
+  if _visible <> IsVisible then
+  begin
+    inherited;
+    VOHandler.ParentVisible := self.Visible;
+  end;
+end;
+
+
+procedure TVisualOverlayPanelEx.SetWidth(int: integer);
+var
+  CanPerformLocalRendering: boolean;
+  w: integer;
+begin
+   CanPerformLocalRendering :=
+     ((_boundsrect.Right - _boundsrect.Left) >= int) and
+     (assigned(ParentLocalRepaint));
+
+  w := _boundsrect.Right - _boundsrect.Left;
+  _boundsrect.Right := _boundsrect.Left + int;
+  _margin.Right := _margin.Right - (int-w);
+
+  if assigned(VOHandler) then VOHandler.SetReferenceRect(BoundsRect);
+
+  if self.Visible then
+  if CanPerformLocalRendering then ParentLocalRepaint(self)
+    else if assigned(self.ParentRepaint) then ParentRepaint(self);
+end;
+
+
+
+procedure TVisualOverlayPanelEx.SetHeight(int: integer);
+var
+  CanPerformLocalRendering: boolean;
+  h: integer;
+begin
+   CanPerformLocalRendering :=
+     ((_boundsrect.Bottom - _boundsrect.Top) >= int) and
+     (assigned(ParentLocalRepaint));
+
+  h := _boundsrect.Bottom - _boundsrect.Top;
+  _boundsrect.Bottom := _boundsrect.Top + int;
+  _margin.Bottom := _margin.Bottom - (int - h);
+
+  if assigned(VOHandler) then VOHandler.SetReferenceRect(BoundsRect);
+
+  if self.Visible then
+  if CanPerformLocalRendering then ParentLocalRepaint(self)
+    else if assigned(self.ParentRepaint) then ParentRepaint(self);
+end;
+
+
+end.

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2011.06.09 21:08:35.133.pas,C:\Program Files\GraphicLW\Unit7.pas=C:\Program Files\GraphicLW\codesegments\common\GLMImporter.pas</Transaction>
+    <Transaction>2011.06.09 21:23:01.333.pas,C:\Program Files\GraphicLW\codesegments\JCL\JclSysInfo.pas=</Transaction>
+    <Transaction>2011.06.09 21:23:01.344.pas,C:\Program Files\GraphicLW\codesegments\JCL\JclResources.pas=</Transaction>
+    <Transaction>2011.06.09 21:40:54.220.pas,C:\Program Files\GraphicLW\codesegments\JCL\JCLCPUInfo.pas=</Transaction>
+    <Transaction>2011.06.09 21:48:10.003.pas,C:\Program Files\GraphicLW\Unit7.pas=C:\Program Files\GraphicLW\codesegments\JCL\SmallCPUInfo.pas</Transaction>
+    <Transaction>2011.06.09 21:51:34.048.pas,C:\Program Files\GraphicLW\codesegments\JCL\SmallCPUInfo.pas=</Transaction>
+    <Transaction>2011.06.12 10:46:50.210.pas,C:\Program Files\GraphicLW\codesegments\common\GLMImporter.pas=</Transaction>
+    <Transaction>2011.06.13 14:29:53.824.pas,C:\Program Files\GraphicLW\Unit7.pas=C:\Program Files\GraphicLW\codesegments\Vector Data Editor\VectorObjectTrigonometry.pas</Transaction>
+    <Transaction>2011.06.16 11:41:56.250.pas,C:\Program Files (x86)\Borland\BDS\4.0\source\Win32\Samples\Source\Spin.pas=</Transaction>
+    <Transaction>2011.06.24 15:47:56.979.pas,C:\Program Files\GraphicLW\Unit7.pas=C:\Program Files\GraphicLW\codesegments\main form\GLMFilterFileProcessor.pas</Transaction>
+  </Transactions>
+</BorlandProject>

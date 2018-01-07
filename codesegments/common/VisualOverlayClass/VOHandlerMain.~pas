@@ -1,0 +1,282 @@
+unit VOHandlerMain;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs,StdCtrls,
+  VisualOverlayEx, VisualOverlayClass;
+
+type
+  TForm1 = class(TForm)
+    procedure FormCreate(Sender: TObject);
+
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+
+    procedure BeforePaintEvent(Sender:TObject);
+    procedure AfterPaintEvent(Sender:TObject);
+
+    procedure NCPanelMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure NCPanelMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure NCPanelMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormResize(Sender: TObject);
+    procedure FormDblClick(Sender: TObject);
+    procedure deepclick(Sender: TObject);
+
+    procedure DummyEvent(Sender:TObject);
+    procedure VOHLocalPaint(Sender:TObject);
+
+  private
+    voh: TVisualoverlayHandler;
+    buffer: TBitmap;
+    panel1  : TVisualOverlayPanelEx;
+    ncpanel : TVisualOverlayPanel;
+    nccancel: TVisualOverlayButton;
+    dummy: TVisualOverlayPanel;
+
+    dragging: boolean;
+    dragstart: TPoint;
+
+
+
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    button1,
+    button2,
+    button3: TVisualOverlayButton;
+    deeplayer: TVisualOverlayPanelEx;
+    deepbutton: TVisualOverlayButton;
+
+    procedure Button1Click(Sender:TObject);
+    procedure Button2Click(Sender:TObject);
+    procedure Button3Click(Sender:TObject);
+    procedure NCCancelClick(Sender:TObject);
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  self.Color := $E0E0E0;
+
+  buffer                  := TBitmap.Create;
+  buffer.PixelFormat      := pf24bit;
+  buffer.Canvas.Brush.Color := self.Color;
+  buffer.Width            := form1.ClientWidth;
+  buffer.Height           := form1.ClientHeight;
+  buffer.Canvas.Font.Name := 'Verdana';
+
+  voh                   := TVisualoverlayHandler.Create(buffer);
+  voh.SetReferenceRect(form1.ClientRect);
+  OnPaint               := voh.ClientPaint;
+  voh.Parent            := self;
+  voh.BeforeClientPaint := self.BeforePaintEvent;
+  voh.AfterClientPaint  := self.AfterPaintEvent;
+
+  // form design!
+
+{$INCLUDE demoframe.inc}
+
+  nccancel.OnClick    := self.NCCancelClick;
+  button1.OnClick     := self.Button1Click;
+  button2.OnClick     := self.Button2Click;
+  button3.OnClick     := self.Button3Click;
+  ncpanel.OnMouseDown := form1.NCPanelMouseDown;
+  ncpanel.OnMouseMove := form1.NCPanelMouseMove;
+  ncpanel.OnMouseUp   := form1.NCPanelMouseUp;
+  deepbutton.OnClick  := self.deepclick;
+  dummy.OnPaint := self.DummyEvent;
+  voh.BeforeClientPaintLocally := self.VOHLocalPaint;
+end;
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// BEGIN of event-linking calls
+
+procedure TForm1.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin voh.ParentMouseUp(Sender,Button,Shift,X,Y); end;
+
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
+begin voh.ParentMouseMove(Sender,Shift,X,Y); end;
+
+procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin voh.ParentMouseDown(Sender,Button,Shift,X,Y); end;
+
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin voh.ParentKeyDown(Sender, Key, Shift); end;
+
+procedure TForm1.FormKeyPress(Sender: TObject; var Key: Char);
+begin voh.ParentKeyPress(Sender, Key); end;
+
+procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin voh.ParentKeyUp(Sender, Key, Shift); end;
+
+// END of event-linking calls
+///////////////////////////////////////////////////////////////////////////////
+
+procedure TForm1.AfterPaintEvent(Sender:TObject);
+begin
+  Windows.BitBlt(
+          self.Canvas.Handle,
+          0,0,buffer.Width,buffer.Height,
+          buffer.Canvas.Handle,0,0,
+          SRCCOPY);
+end;
+
+procedure TForm1.BeforePaintEvent(Sender:TObject);
+begin
+  buffer.Canvas.Brush.Style := bsSolid;
+  buffer.Canvas.Brush.Color := self.Color;
+  buffer.Canvas.FillRect(rect(0,0,buffer.Width,buffer.Height));
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+
+procedure TForm1.WndProc(var Message: TMessage);
+begin
+  // remove the background erase message because
+  // glm will overwrite the area in the subsequent
+  // WM_PAINT step, thus avoid flickering
+  //
+  if Message.Msg <> WM_ERASEBKGND then
+    inherited WndProc(Message);
+end;
+
+
+procedure TForm1.FormResize(Sender: TObject);
+begin
+  if buffer.Width  < form1.ClientWidth      then buffer.Width  := form1.ClientWidth  + 128;
+  if buffer.Height < form1.ClientHeight     then buffer.Height := form1.ClientHeight + 128;
+  if buffer.Width  > form1.ClientWidth +128 then buffer.Width  := form1.ClientWidth  +  32;
+  if buffer.Height > form1.ClientHeight+128 then buffer.Height := form1.ClientHeight +  32;
+
+  voh.SetReferenceRect(form1.ClientRect);
+  voh.ParentResize(self);
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+// arbitrary demo functionality
+
+procedure TForm1.Button1Click(Sender:TObject);
+var s: string;
+begin
+  //
+  //s := Button1.Owner.ClassName;
+  //Application.MessageBox(PChar(s),'');
+end;
+
+procedure TForm1.Button2Click(Sender:TObject);
+begin
+  voh.surpressrepaint;
+  panel1.Left := 200;
+  panel1.Top  := 4;
+end;
+
+procedure TForm1.Button3Click(Sender:TObject);
+var
+  parentrect:TRect;
+  vo: TVisualOverlayPanel;
+begin
+    vo := panel1;
+    parentrect.Left   := vo.Left - vo.Margin.Left;
+    parentrect.Right  := vo.Left + vo.Width  + vo.Margin.Right;
+    parentrect.Top    := vo.Top  - vo.Margin.Top;
+    parentrect.Bottom := vo.Top  + vo.Height + vo.Margin.Bottom;
+    Application.MainForm.Canvas.Brush.Color := cllime;
+    Application.MainForm.Canvas.FrameRect(vo.BoundsRect);
+    Application.MainForm.Canvas.Brush.Color := clyellow;
+    Application.MainForm.Canvas.FrameRect(parentrect);
+    
+    With Application.MainForm.Canvas do
+    begin
+      TextOut(0             ,clientheight div 2,inttostr(vo.Margin.Left));
+      TextOut(clientwidth-TextWidth(inttostr(vo.Margin.right)),
+        clientheight div 2,inttostr(vo.Margin.right));
+      TextOut(clientwidth div 2,0,inttostr(vo.Margin.Top));
+      TextOut(clientwidth div 2,clientheight-16,inttostr(vo.Margin.Bottom));
+    end;
+end;
+
+procedure TForm1.FormDblClick(Sender: TObject);
+begin
+  panel1.Show;
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+// form behaviour functionality
+
+procedure TForm1.NCCancelClick(Sender:TObject);
+begin
+  panel1.Hide;
+end;
+
+procedure TForm1.NCPanelMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+begin
+  dragging := false;
+end;
+
+procedure TForm1.NCPanelMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+begin
+ if dragging then
+ begin
+   voh.surpressrepaint;
+   panel1.Left := panel1.Left + (X-dragstart.X);
+   panel1.Top  := panel1.Top  + (Y-dragstart.Y);
+ end;
+
+ dragstart := Point(X,Y);
+end;
+
+procedure TForm1.NCPanelMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+begin
+  dragging  := true;
+  dragstart := Point(X,Y);
+end;
+
+//
+///////////////////////////////////////////////////////////////////////////////
+
+
+procedure TForm1.deepclick(Sender: TObject);
+begin
+  deeplayer.InsertComponent(deepbutton);
+  voh.ClientPaint(self);
+end;
+
+
+procedure TForm1.DummyEvent(Sender:TObject);
+begin
+  // 
+end;
+
+procedure TForm1.VOHLocalPaint(Sender:TObject);
+begin
+  //
+end;
+
+end.

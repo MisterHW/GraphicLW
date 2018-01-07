@@ -1,0 +1,290 @@
+unit RList;
+
+interface
+uses
+  Classes;
+
+
+const
+  INDEX_NOT_RESOLVED = -1;
+
+
+type TResolverItem = record
+  ID     : int64;
+  Obj    : TObject;
+  Delete : Boolean;
+end;
+
+
+type TResoverList = class
+  constructor Create;
+  destructor Destroy; override;
+private
+  _Count: longint;
+
+public
+  Items: Array of TResolverItem;
+  Property Count: longint read _Count;
+
+  procedure Clear;
+
+  procedure Append( objRef: TObject; objID: int64);
+  procedure SortByID;
+
+  procedure MarkForDeletion(obj: TObject);  overload;
+  procedure MarkForDeletion(ID: int64);     overload;
+  procedure ApplyDeletion;
+
+  procedure Delete(obj: TObject); overload;
+  procedure Delete(ID: int64);    overload;
+
+  function IndexByObj(obj: TObject): longint;
+  function IndexByID(ID: int64): longint; // that is what it's all about
+end;
+
+
+
+implementation
+
+const
+  AllocationBlockSize = 1024;
+
+
+
+constructor TResoverList.Create;
+begin
+  inherited;
+  _Count := 0;
+  SetLength(Items, 1 * AllocationBlockSize);
+end;
+
+
+
+destructor TResoverList.Destroy;
+begin
+  SetLength(Items, 0);
+  inherited;
+end;
+
+
+
+procedure TResoverList.Clear;
+begin
+  _Count := 0;
+  if Length(Items) <> AllocationBlockSize then
+    SetLength(Items, 1 * AllocationBlockSize);
+end;
+
+
+
+procedure TResoverList.Append( objRef: TObject; objID: int64);
+  function GetNewArraySize( newlen: longint; blocksize: longint): longint;
+  begin
+    result := newlen div blocksize;
+    if (newlen mod blocksize) <> 0 then inc(Result);
+    result := result * blocksize;
+  end;
+var
+  newsize: longint;
+begin
+  newsize := GetNewArraySize(_Count+1,AllocationBlockSize);
+  if newsize <> length(Items) then setlength(Items, newsize);
+
+
+  with Items[_Count] do
+  begin
+    Obj     := objRef;
+    ID      := objID;
+    Delete  := false;
+  end;
+  inc(_Count);
+end;
+
+
+
+procedure TResoverList.SortByID;
+
+   procedure quicksort(rangestart, rangeend: longint);
+   var
+      leftidx, rightidx       : longint;
+      criticalval             : int64;            // type of record member by which is being sorted
+      buffer                  : TResolverItem;    // type of list elements
+      CriticalIndex           : longint;
+   begin
+      if (rangeend-rangestart > 0) then           // break condition test
+      begin
+         leftidx        := rangestart-1;
+         rightidx       := rangeend;
+         criticalindex  := (rangestart+rangeend) div 2;
+
+         buffer                := Items[criticalindex]; // optimize for well-ordered arrays
+         Items[criticalindex]  := Items[rangeend];
+         Items[rangeend]       := buffer;
+
+         criticalval := Items[rangeend].ID;       // pick one element, take it as the critical element
+
+         repeat // swap and iterate through all elements from both sides until indices meet/cross
+            repeat inc(leftidx)  until (Items[LeftIdx].ID  >= criticalval); // iterate inwards from the left
+            repeat dec(rightidx) until (Items[RightIdx].ID <= criticalval); // iterate inwards from the right
+
+            buffer           := Items[LeftIdx];   // swap
+            Items[LeftIdx]   := Items[RightIdx];
+            Items[RightIdx]  := buffer;
+
+         until RightIdx <= LeftIdx;
+
+        Items[RightIdx] := Items[LeftIdx];        // undo last swap and place critical element
+        Items[LeftIdx]  := Items[rangeend];       // in between the two sub sets
+        Items[rangeend] := buffer;                // buffer is Items[RightIdx], see above
+
+        if rangestart >=0 then
+          quicksort( rangestart , LeftIdx-1 );    // divide & conquer.
+        if LeftIdx+1 >= 0 then
+          quicksort( LeftIdx+1  , rangeend  );
+      end; // if
+   end;
+
+begin
+   if _Count > 1 then quicksort(0,_Count-1);
+end;
+
+
+
+
+procedure TResoverList.MarkForDeletion(obj: TObject);
+var idx: longint;
+begin
+  idx := self.IndexByObj(obj);
+  if idx <> INDEX_NOT_RESOLVED then Items[idx].Delete := true;
+end;
+
+
+
+procedure TResoverList.MarkForDeletion(ID: int64);
+var idx: longint;
+begin
+  idx := self.IndexByID(ID);
+  if idx <> INDEX_NOT_RESOLVED then Items[idx].Delete := true;
+end;
+
+
+
+
+procedure TResoverList.ApplyDeletion;
+var
+  readcur, writecur : longint;
+  newsize: longint;
+
+  function GetNewArraySize( newlen: longint; blocksize: longint): longint;
+  begin
+    result := newlen div blocksize;
+    if (newlen mod blocksize) <> 0 then inc(Result);
+    result := result * blocksize;
+  end;
+
+begin
+
+  writecur := 0;
+
+  for readcur := 0 to _Count - 1 do
+  begin
+    if (readcur <> writecur)     then Items[writecur] := Items[readcur];
+    if not Items[readcur].Delete then inc(writecur);
+  end; // for
+  // writecursor becomes write*count* by the last increment that is applied without yet another loop cycle
+
+  if writecur <> _Count then // reduce size to next block size if needed
+  begin
+    newsize := GetNewArraySize(writecur , AllocationBlockSize);
+    if length(Items) <> newsize then SetLength(Items, newsize);
+    _Count := writecur;
+  end;
+
+end;
+
+
+
+procedure TResoverList.Delete(obj: TObject);
+var idx: longint;
+begin
+  idx := self.IndexByObj(obj);
+  if idx <> INDEX_NOT_RESOLVED then Items[idx].Delete := true;
+  ApplyDeletion;
+end;
+
+
+
+
+procedure TResoverList.Delete(ID: int64);
+var idx: longint;
+begin
+  idx := self.IndexByID(ID);
+  if idx <> INDEX_NOT_RESOLVED then Items[idx].Delete := true;
+  ApplyDeletion;
+end;
+
+
+
+function TResoverList.IndexByObj(obj: TObject): longint;
+var i: integer;
+begin
+   result := INDEX_NOT_RESOLVED;
+   for i:= 0 to _Count - 1 do
+   begin
+      if Items[i].Obj = obj then
+      begin
+        Result := i;
+        break;
+      end;
+   end;
+end;  
+
+
+
+function TResoverList.IndexByID(ID: int64): longint;
+
+  function FindByID(ID: int64; LowerIdx, UpperIdx: longint):longint;
+  var
+    MiddleIdx: Longint;
+    MiddleID: int64;
+  begin
+    if (LowerIdx = UpperIdx) then
+    begin
+
+      if Items[LowerIdx].ID = ID then
+      begin
+        result := LowerIdx;
+        exit;
+      end
+      else
+        exit;
+
+    end
+    else
+    begin
+
+      if Items[LowerIdx].ID  = ID then begin result := LowerIdx;  exit; end;
+      if Items[UpperIdx].ID  = ID then begin result := UpperIdx;  exit; end;
+
+      MiddleIdx := (LowerIdx + UpperIdx) div 2;
+      MiddleID := Items[MiddleIdx].ID;
+
+      if MiddleID = ID then begin result := MiddleIdx; exit; end;
+
+      if MiddleID > ID then
+        result := FindByID(ID, LowerIdx, MiddleIdx)
+      else
+        result := FindByID(ID, MiddleIdx+1, UpperIdx);
+
+    end; // if
+  end; // function
+
+begin
+  result := INDEX_NOT_RESOLVED; // default to "not resolved"
+  if _Count = 0 then exit;
+  result := FindByID(ID, 0, _Count-1);
+end;
+
+
+
+end.

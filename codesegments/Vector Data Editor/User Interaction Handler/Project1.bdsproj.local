@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2011.06.03 20:30:18.081.pas,C:\Users\Pharao\Documents\Borland Studio-Projekte\Unit1.pas=C:\Users\Pharao\Documents\Borland Studio-Projekte\Editor functionality\Unit1.pas</Transaction>
+    <Transaction>2011.06.03 20:30:18.081.dfm,C:\Users\Pharao\Documents\Borland Studio-Projekte\Unit1.dfm=C:\Users\Pharao\Documents\Borland Studio-Projekte\Editor functionality\Unit1.dfm</Transaction>
+    <Transaction>2011.06.03 20:30:18.641.bdsproj,C:\Users\Pharao\Documents\Borland Studio-Projekte\Project1.bdsproj=C:\Users\Pharao\Documents\Borland Studio-Projekte\Editor functionality\Project1.bdsproj</Transaction>
+    <Transaction>2011.06.03 21:16:16.390.pas,C:\Users\Pharao\Documents\Borland Studio-Projekte\Editor functionality\Unit2.pas=C:\Users\Pharao\Documents\Borland Studio-Projekte\Editor functionality\UIntHandler.pas</Transaction>
+  </Transactions>
+</BorlandProject>

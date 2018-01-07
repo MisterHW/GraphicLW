@@ -1,0 +1,57 @@
+object ScanForm: TScanForm
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'ScanForm'
+  ClientHeight = 63
+  ClientWidth = 229
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 120
+  TextHeight = 16
+  object BtnScan: TButton
+    Left = 8
+    Top = 31
+    Width = 75
+    Height = 25
+    Caption = 'Scannen'
+    TabOrder = 0
+    OnClick = BtnScanClick
+  end
+  object CBGUI: TCheckBox
+    Left = 8
+    Top = 8
+    Width = 217
+    Height = 17
+    Caption = 'GUI der Twain-Software anzeigen'
+    TabOrder = 1
+  end
+  object Twain: TDelphiTwain
+    OnSourceDisable = TwainSourceDisable
+    OnAcquireCancel = TwainAcquireCancel
+    OnTwainAcquire = TwainTwainAcquire
+    TransferMode = ttmMemory
+    SourceCount = 0
+    Info.MajorVersion = 1
+    Info.MinorVersion = 0
+    Info.Language = tlUserLocale
+    Info.CountryCode = 1
+    Info.Groups = [tgControl, tgImage]
+    Info.VersionInfo = 'Application name'
+    Info.Manufacturer = 'Application manufacturer'
+    Info.ProductFamily = 'App product family'
+    Info.ProductName = 'App product name'
+    LibraryLoaded = False
+    SourceManagerLoaded = False
+    Left = 88
+    Top = 24
+  end
+end

@@ -1,0 +1,373 @@
+unit HistogramCmp;
+
+
+interface
+  uses
+    Sysutils, Classes, Controls, ExtCtrls, GraphicUtils, Graphics, WIndows, Messages,
+    BufferedCmp, Math, MathUtils;
+
+    type THistogramCmp = class(TBufferedCmp)
+      constructor Create (
+        parent       : TWinControl;
+        width,height : integer;
+        data         : TMemoryStream);
+
+      destructor Destroy; override;
+    private
+      margin     : Array[0..3] of integer;
+      DispClasses: Array of Integer;
+      Quantile   : Array[0..6] of longint;
+      QuantileVal: Array[0..6] of single;
+      marker5,marker25, marker50, marker75,marker95: integer;
+      PeakClass: longint;
+      MeanClass  : longint;
+      mean: single;
+      MouseIsDown: Boolean;
+
+      function DiagXPosOf(s: single): integer;
+      procedure RenderGraphic(Sender:TObject);
+      procedure ClassifyData(data: Pointer; size: int64);
+      function GetQuantileVal(idx: integer): single;
+    public
+      property QuantileValue[idx: integer] : single read GetQuantileVal;
+      procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+      procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    end;
+
+implementation
+
+ const
+    ccFrameColor          = clblack;
+    ccBgColor             = clWhite;
+    ccGradientUpperColor  = clgray;
+    ccGRadientBottomColor = $505050;
+    ccBaseDataColor       = $A00000;
+    ccLimitDataColor      = clblack;
+    ccSelectedDataColor   = clblue;
+    ccMarkerColor         = $300000;
+    ccSelectionUpperColor = clwhite;
+    ccSelectionBottomColor= clsilver;
+    ccTextColor           = clblack;
+    ccArrowColor          = $C0C0C0;
+
+ const
+   mleft   = 0;
+   mtop    = 1;
+   mright  = 2;
+   mbottom = 3;
+
+
+
+  constructor THistogramCmp.Create (parent : TWinControl; width,height : integer; data : TMemoryStream );
+  var
+    m: TMemoryStream;
+    i: integer;
+
+     function ReadSingle(idx: longint; mem: Pointer = nil): single;
+    begin
+      if mem= nil then
+        result := Psingle(Cardinal(data.memory)+ idx shl 2)^
+      else
+        result := Psingle(Cardinal(mem)+ idx shl 2)^;
+    end;
+
+  begin
+
+    // create object
+
+    inherited Create(parent,width, height);
+    self.Parent := parent;
+    self.Width := width;
+    self.Height := Height;
+    self.Hint := 'Histogram';
+    Margin[mleft  ] := 16;
+    Margin[mtop   ] := 16;
+    Margin[mright ] := 16;
+    Margin[mbottom] := 32;
+
+    // generate Classes
+
+    m := CloneStream(data);
+    SortSingleData(m.Memory,m.Size);
+
+    Quantile[6] :=        m.size div 4-1;
+    Quantile[5] :=  ceil((m.size div 4)*0.95);
+    Quantile[4] :=  ceil((m.size div 4)*0.75);
+    Quantile[3] := round((m.size div 4)*0.50);
+    Quantile[2] := floor((m.size div 4)*0.25);
+    Quantile[1] := floor((m.size div 4)*0.05);
+    Quantile[0] := 0;
+    for i :=0 to 6 do
+      QuantileVal[i] := ReadSingle(Quantile[i],m.memory);
+
+    setlength(DispClasses,DiagXPosOf(1)-DiagXPosOf(0));
+
+    self.ClassifyData(Pointer(Cardinal(m.Memory)+Quantile[1]*4),(Quantile[5]-Quantile[1])*4 );
+
+    m.free;
+
+    // setup events
+
+    MouseIsDown := false;
+    self.OnPaint := RenderGraphic;
+    self.OnMouseDown := self.FormMouseDown;
+    self.OnMouseUp := self.FormMouseUp;
+  end;
+
+
+
+  function THistogramCmp.GetQuantileVal(idx: integer): single;
+  begin
+    result := self.QuantileVal[idx];
+  end;
+
+
+
+  procedure THistogramCmp.RenderGraphic(Sender:TObject);
+  var
+    x: integer;
+    rescalemax: longint;
+    rescalefactor: single;
+    innerarea: TRect;
+
+    procedure RenderXLabel(cap: string; pos: integer;yoffset: integer);
+    var w: integer;
+    begin
+      w:= self.Canv.TextWidth(cap);
+      self.Canv.Font.Name := 'Courier New';
+      self.Canv.Font.Size := 7;
+      self.Canv.Brush.Style := bsclear;
+      self.Canv.TextOut(margin[mleft]+pos-w div 2,self.Height-margin[mbottom]+1+yoffset,cap);
+    end;
+
+    procedure RenderArrow(x,y: integer;c: tcolor = ccArrowColor);
+    var i: integer;
+    begin
+      self.Canv.Pen.Color := c;
+      for i := 0 to 10 do
+      begin
+        self.Canv.MoveTo(x-i div 2,y-i);
+        self.Canv.LineTo(x+i div 2,y-i);
+      end;
+    end;
+
+  begin
+
+    // render Background
+
+      self.Canv.Brush.Style := bssolid;
+      self.Canv.Brush.Color := ccBgColor;
+      self.Canv.FillRect(Rect(0,0,width,height));
+
+      RenderGradient(self.Canv,
+              Margin[mleft],
+              Margin[mtop],
+              self.width -Margin[mright] -Margin[mleft],
+              self.Height-Margin[mbottom]-Margin[mtop],
+              clsilver,
+              clgray);
+
+
+       // interrupt if needed
+      if self.MouseIsDown then
+      begin
+        self.Canv.Brush.Color := ccFrameColor;
+        self.Canv.FrameRect(Rect(0,0,self.Width,self.Height));
+        self.Canv.FrameRect(Rect(margin[mleft],margin[mtop],self.Width-Margin[mright],self.Height-Margin[mbottom]+1));
+
+        self.Canv.Brush.Style := bsclear;
+        innerarea := Rect( Margin[mleft]+6,
+                Margin[mtop]+2-canv.TextHeight('|'),
+                self.width -Margin[mright] -Margin[mleft],
+                self.Height-Margin[mbottom]-Margin[mtop] );
+
+        windows.DrawText( canv.Handle,PChar(self.Hint),length(self.Hint), innerArea, DT_LEFT OR DT_NOCLIP );
+        self.Repaint(nil);
+        exit;
+      end;
+
+      RenderGradient(self.Canv,
+              margin[mleft]+marker25,
+              margin[mtop],
+              marker75-marker25,
+              self.Height-Margin[mbottom]-Margin[mTop],
+              ccSelectionUpperColor,
+              ccSelectionBottomColor);
+
+    // render frames
+
+      self.Canv.Brush.Color := clwhite;
+      self.Canv.FrameRect(Rect(margin[mleft]+marker25,margin[mtop],Margin[mleft]+marker75,self.Height-Margin[mbottom]+1));
+
+      self.Canv.Brush.Color := ccFrameColor;
+      self.Canv.FrameRect(Rect(0,0,self.Width,self.Height));
+      self.Canv.FrameRect(Rect(margin[mleft],margin[mtop],self.Width-Margin[mright],self.Height-Margin[mbottom]+1));
+
+    // render Markers
+
+      RenderXLabel( '[0.05]',marker5 ,12);
+      RenderXLabel( '[0.25]',marker25,0);
+      RenderXLabel( '[0.50]',marker50,12);
+      RenderXLabel( '[0.75]',marker75,0);
+      RenderXLabel( '[0.95]',marker95,12);
+
+      RenderArrow(Margin[mleft]+MeanClass,16,$00A0A0);       // mean
+      self.canv.Pen.Color := clyellow;
+      self.Canv.MoveTo(Margin[mleft]+MeanClass,margin[mtop]+1);
+      self.Canv.LineTo(Margin[mleft]+MeanClass,self.Height-margin[mbottom]);
+
+      RenderArrow(Margin[mleft]+Marker50,16,clgreen);    // median
+      self.canv.Pen.Color := cllime;
+      self.Canv.MoveTo(Margin[mleft]+Marker50,margin[mtop]+1);
+      self.Canv.LineTo(Margin[mleft]+Marker50,self.Height-margin[mbottom]);
+
+      self.Canv.Font.Name := 'Courier New';
+      self.Canv.TextOut(4,2,'peak: '+inttostr(DispClasses[PeakClass]));
+      self.Hint := 'Histogram'#13#10+
+                   'mean value     : '+floattostr(Mean)+#13#10+
+                   'median value   : '+floattostr(QuantileVal[3])+#13#10+
+                   '  0% quantile  : '+floattostr(QuantileVal[0])+#13#10+
+                   '  5% quantile  : '+floattostr(QuantileVal[1])+#13#10+
+                   ' 95% quantile  : '+floattostr(QuantileVal[5])+#13#10+
+                   '100% quantile  : '+floattostr(QuantileVal[6]);
+
+    // render Data
+
+      rescalemax :=0;
+      for x := 0 to length(DispClasses)-1 do
+        if DispClasses[x] > rescaleMax then  rescaleMax := DispClasses[x];
+      if rescaleMax = 0 then RescaleMax := 1;
+      RescaleFactor := (self.Height -margin[mtop]-margin[mbottom] - 16) /rescalemax;
+
+
+      self.Canv.Pen.Color := ccBaseDataColor;
+      for x := 0 to length(DispClasses)-1 do
+      begin
+        canv.MoveTo(DiagXPosOf(0)+x,self.Height-margin[mbottom]);
+        canv.LineTo(DiagXPosOf(0)+x,self.Height-margin[mbottom]-round(DispClasses[x]*rescalefactor));
+      end;
+      self.Canv.Pen.Color := ccSelectedDataColor;
+      for x := marker25 to marker75-1 do
+      begin
+        canv.MoveTo(DiagXPosOf(0)+x,self.Height-margin[mbottom]);
+        canv.LineTo(DiagXPosOf(0)+x,self.Height-margin[mbottom]-round(DispClasses[x]*rescalefactor));
+      end;
+
+      self.Canv.Pen.Color := ccLimitDataColor;
+      self.Canv.MoveTo(DiagXPosOf(0),self.Height- Margin[mBottom]);
+      for x := 0 to length(DispClasses)-1 do
+        self.Canv.LineTo(DiagXPosOf(0)+x,self.Height- Margin[mBottom] -round(DispClasses[x]*rescalefactor));
+
+
+
+    // repaint
+
+      self.Repaint(nil);
+
+  end;
+
+
+
+  function THistogramCmp.DiagXPosOf(s: single): integer;
+  begin
+    result := round(Margin[mLeft]+ s*(self.Width- Margin[mLeft] - Margin[mRight]));
+  end;
+
+
+
+  procedure THistogramCmp.ClassifyData(data: Pointer; size: int64);
+  var i: longint;
+      min_val, max_val, val_range: single;
+      hiDispCl: longint;
+
+    function ReadSingle(idx: longint): single;
+    begin
+      result := Psingle(Cardinal(data)+ idx shl 2)^;
+    end;
+
+    function ClassIndex(elem: single): longint;
+    begin
+      result := floor(hiDispCl* ((elem-min_val)/val_range) );
+    end;
+
+  begin
+
+    hiDispCl := length(DispClasses)-1;
+    min_val := ReadSingle(0);
+    max_val := ReadSingle(size div 4 -1);
+    val_range := max_val - min_val;
+    if val_range = 0 then val_range := 1; // ERROR !!!
+
+    for i := 0 to hiDispCl do DispClasses[i] :=0;
+    for i := 0 to round(size/4)-1 do
+      inc(DispClasses[ClassIndex(ReadSingle(i))]);
+
+    marker5  := ClassIndex(QuantileVal[1]);
+    marker25 := ClassIndex(QuantileVal[2]);
+    marker50 := ClassIndex(QuantileVal[3]);
+    marker75 := ClassIndex(QuantileVal[4]);
+    marker95 := ClassIndex(QuantileVal[5]);
+
+    mean := 0;
+    for i := 0 to size div 4 -1 do
+      mean := mean + ReadSingle(i);
+    mean := mean / round(size/4);
+
+    meanclass := ClassIndex(mean);
+
+    PeakClass :=0;
+    for i := 0 to hiDispCl do
+      if DispClasses[i] > DispClasses[PeakClass] then PeakClass := i;
+
+
+
+  end;
+
+
+
+
+  destructor THistogramCmp.Destroy;
+  begin
+    setlength(self.DispClasses,0);
+    inherited;
+  end;
+
+
+
+  procedure THistogramCmp.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  begin
+    self.MouseIsDown := true;
+    self.RenderGraphic(self);
+    self.ShowHint := false;
+  end;
+
+
+  procedure THistogramCmp.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  begin
+    self.MouseIsDown := false;
+    self.RenderGraphic(self);
+    self.ShowHint := true;
+  end;
+
+
+
+
+{////////////////////////////////////////////////////////////////
+
+
+THistogram Komponente
+
+1. Schritt : Daten duplizieren
+2. Schritt : sortieren der Daten, beginnend mit dem kleinsten Datum
+3. Schritt : Es gebe für jedes Pixel in x-Richtung des Diagramms eine Klasse.
+             Bestimmen der Quantile und zuweisen der Daten in Klassen
+4. Schritt : Ermittung des mean-Wertes
+5. Schritt : Ausgabe der Darstellung
+
+
+}////////////////////////////////////////////////////////////////
+
+end.
+
+
+

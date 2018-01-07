@@ -1,0 +1,224 @@
+unit bilinearRegistration;
+
+interface
+
+uses
+  ap,inv,Graphics,Sysutils, math;
+
+type
+
+   TFloat = double;
+
+   T2DPoint = record
+     x,y : TFloat;
+   end;
+
+   TTemplate = record
+     p1,p2 : T2DPoint;
+   end;
+
+   TInterpolationMethod = (imNearestNeighbour, imBilinear, imCubic, imSinc256);
+
+   TResizingMethod = (rmNoChange,rmSameSize,rmMaximum);
+
+   T4Templates = array[1..4] of TTemplate;
+
+   T4Vector    = array[1..4] of TFloat;
+
+   function f(x,y : double; alpha : T4Vector):double;
+
+   function G1D2interpolation(templates : T4Templates;
+                              var alphax:T4Vector; var alphay : T4Vector):boolean;
+
+function registration(A,B : TBitmap;alphax,alphay:T4Vector;resizingMethod:TResizingMethod; imode: TInterpolationMethod):boolean;
+
+implementation
+
+
+function f(x,y : double; alpha : T4Vector):double;
+begin
+   f := alpha[1]+alpha[2]*x+alpha[3]*y+alpha[4]*x*y;
+end;
+
+procedure mult(A : TReal2DArray; v : T4Vector;var result: T4Vector);
+begin
+  result[1] := A[1,1]*v[1]+A[1,2]*v[2]+A[1,3]*v[3]+A[1,4]*v[4];
+  result[2] := A[2,1]*v[1]+A[2,2]*v[2]+A[2,3]*v[3]+A[2,4]*v[4];
+  result[3] := A[3,1]*v[1]+A[3,2]*v[2]+A[3,3]*v[3]+A[3,4]*v[4];
+  result[4] := A[4,1]*v[1]+A[4,2]*v[2]+A[4,3]*v[3]+A[4,4]*v[4];
+end;
+
+procedure resampleNN(A,B : TBitmap;alphax,alphay:T4Vector);
+var i,j : integer;
+begin
+  for i := 0 to B.Width - 1 do
+  for j := 0 to B.Height - 1 do
+  begin
+      B.Canvas.Pixels[i,j] := A.Canvas.Pixels[i+round(f(i,j,alphax)),
+                                              j+round(f(i,j,alphay))];
+  end;
+end;
+
+procedure resampleBilinear(A,B : TBitmap; alphax,alphay : T4Vector);
+var
+  i,j : integer;
+  P, Q, Q2: PByteArray;
+  y_, _w, _h, ipx, ipy, xxx, xxxr : integer;
+  QBase, QLineDelta, base, linedelta: Cardinal;
+  px, py : single;
+  xfactor, x_1factor, yfactor, y_1factor: Word;
+  buf: Cardinal;
+  rgb: Array[0..3] of byte absolute buf;
+begin
+    Q  := A.ScanLine[0];
+    Q2 := A.ScanLine[1];
+    y_ := 0;
+    QBase      := Cardinal(@Q[0]);
+    QLineDelta := Cardinal(@Q[0])-Cardinal(@Q2[0]);
+
+    _w := A.Width;
+    _h := A.Height;
+
+    base         := Cardinal(A.Scanline[0]);
+    linedelta    := Cardinal(A.ScanLine[1]) - base;
+
+
+  for j := 0 to B.Height - 1 do
+  begin
+
+  P := B.ScanLine[j];
+
+  for i := 0 to B.Width - 1 do
+  begin
+        px := i+(f(i,j,alphax));
+        py := j+(f(i,j,alphay));
+        ipx := trunc(px);
+        ipy := trunc(py);
+
+        if (ipx>=0) and (ipx <_w) and (ipy >=0) and (ipy < _h) then
+        begin
+
+          if ipy <> y_ then
+          begin
+            y_ := ipy;
+            Q  := Pointer( base + (Cardinal(ipy)  ) mod Cardinal(_h) * linedelta);
+            Q2 := Pointer( base + (Cardinal(ipy)+1) mod Cardinal(_h) * linedelta);
+            if (ipy +1 = _h) then Q2 := Q;
+          end;
+
+
+          xxx  := ipx*3;
+          xxxr :=(ipx+1) mod (_w) * 3;
+          if (ipx +1 = _w) then xxxr := xxx;
+
+          xfactor := floor(256*(px - ipx));
+          x_1factor := 256-xfactor;
+          yfactor := floor(256*(py - ipy));
+          y_1factor := 256-yfactor;
+
+          buf :=    ( ((Q [xxx   ]*x_1factor) +
+                       (Q [xxxr  ]*  xfactor) ) shr 8 * y_1factor
+                     +((Q2[xxx   ]*x_1factor) +
+                       (Q2[xxxr  ]*  xfactor) ) shr 8 * yfactor) shr 8 and $FF or
+
+                    ( ((Q [xxx +1]*x_1factor) +
+                       (Q [xxxr+1]*  xfactor) ) shr 8 * y_1factor
+                     +((Q2[xxx +1]*x_1factor) +
+                       (Q2[xxxr+1]*  xfactor) ) shr 8 * yfactor) and $FF00 or
+
+                    ( ((Q [xxx +2]*x_1factor) +
+                       (Q [xxxr+2]*  xfactor) ) shr 8 * y_1factor
+                     +((Q2[xxx +2]*x_1factor) +
+                       (Q2[xxxr+2]*  xfactor) ) shr 8 * yfactor) shl 8 and $FF0000;
+
+          xxx := 3*i;
+          P[xxx]   := rgb[0]; P[xxx+1] := rgb[1]; P[xxx+2] := rgb[2];
+
+        end; // if [ranges]
+    end;
+  end;
+end;
+
+
+function G1D2interpolation(templates : T4Templates;
+                              var alphax:T4Vector; var alphay : T4Vector):boolean;
+var success : boolean;
+    A : TReal2DArray;
+    i : integer;
+    bx,by : T4Vector;
+begin
+
+   setlength(A,5,5);
+   for i := 1 to 4 do
+   begin
+      A[i,1] := 1;
+      A[i,2] := templates[i].p2.x;
+      A[i,3] := templates[i].p2.y;
+      A[i,4] := A[i,2]*A[i,3];
+      bx[i]  := templates[i].p1.x-templates[i].p2.x;
+      by[i]  := templates[i].p1.y-templates[i].p2.y;
+   end;
+
+   success := inv.Inverse(A,4);
+
+   if success then
+   begin
+     mult(A,bx,alphax);
+     mult(A,by,alphay);
+   end;
+
+   G1D2interpolation := success;
+end;
+
+function registration(A,B : TBitmap;alphax,alphay:T4Vector;resizingMethod:TResizingMethod; imode: TInterpolationMethod):boolean;
+var
+    success : boolean;
+   // corners : T4Templates;
+begin
+   success := true;
+
+   if not assigned(A) then success := false;
+
+   if success then
+   begin
+      if not assigned(B) then B := TBitMap.Create;
+
+      if (resizingMethod = rmNoChange) then
+      begin
+         // do as it says...
+      end
+      else if (resizingMethod = rmSameSize) then
+      begin
+        B.Width :=  A.Width;
+        B.Height := A.Height;
+      end
+      else if (resizingMethod = rmMaximum) then
+      begin
+//        corners[1].p1.x := 0        + f(0,B.Height-1,alphax);
+//        corners[1].p1.y := B.Height + f(0,B.Height-1,alphay);
+//        corners[2].p1.x := 0        + f(0,B.Height-1,alphax);
+//        corners[2].p1.y := B.Height + f(0,B.Height-1,alphay);
+//        corners[3].p1.x := 0        + f(0,B.Height-1,alphax);
+//        corners[3].p1.y := B.Height + f(0,B.Height-1,alphay);
+//        corners[4].p1.x := 0        + f(0,B.Height-1,alphax);
+//        corners[4].p1.y := B.Height + f(0,B.Height-1,alphay);
+
+
+        B.Width :=  A.Width;
+        B.Height := A.Height;
+      end
+      else success := false;
+   end;
+
+   if success then
+     if imode = imBilinear
+       then resampleBilinear(A,B,alphax,alphay)
+       else resampleNN(A,B,alphax,alphay);
+
+   registration := success;
+end;
+
+
+
+
+end.

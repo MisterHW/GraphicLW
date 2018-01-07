@@ -1,0 +1,13 @@
+program RListDemo;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils,
+  RList in 'RList.pas';
+
+begin
+
+
+  readln;
+end.

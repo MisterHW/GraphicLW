@@ -1,0 +1,919 @@
+unit GLWdef;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,Types,
+  Dialogs, StdCtrls, FileSystemWatch, Math, XMLDoc, XMLIntf;
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+type TXMLExportableObject= class
+    Payload: iXMLNodeList;
+    procedure SaveToXMLStructure(  var xml : IXMLNode); virtual; abstract;
+    procedure LoadFromXMLStructure(var xml : IXMLNode); virtual; abstract;
+end;
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+
+type TMetaEntry = record
+  UID: longint; // Array Identifier, independent from any other IDs the object might have
+                // primary use is the indexing for query results
+  obj: TObject;
+end;
+
+
+
+type TQueryIndexList = record
+  QueryID: longint;
+  UIDs: array of longint;
+end; PQueryIndexList = ^TQueryIndexList;
+
+
+
+type TMetaData = class(TXMLExportableObject)
+  constructor Create;
+  destructor Destroy; override;
+private
+  Queries: Array of TQueryIndexList; // index arrays
+public
+  TagName: string;
+  Entries: Array of TMetaEntry;      // want immediate access, moved from private to public
+  function  Add(new: TObject):int64;
+  function  Find(UID: int64): TObject;
+  function  QueryEntries(by_this_class: TClass): PQueryIndexList;
+  function  FindQuery(QUID: int64): PQueryIndexList;
+  procedure FreeQuery(QUID: int64);
+  procedure Remove(entry: int64);   overload;
+  procedure Remove(entry: TObject); overload;
+
+  procedure SaveToFile(filename: string);
+  procedure SaveToXMLStructure(  var xml : IXMLNode)  ; overload; override;
+  procedure SaveToXMLStructure( IXMLDoc: IXMLDocument); overload;
+  procedure LoadFromXMLStructure(var xml : IXMLNode);             override;
+end;
+
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+type
+
+  TVectorObject = class;
+
+
+  TObjectArray = Array of TVectorObject;
+
+
+  TVectorObject = class(TXMLExportableObject)
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+  private
+    function GetTagName :string; virtual; abstract;
+
+  protected
+    _ParentLayerID: longint;
+    _UID: int64;
+
+  public
+    Tag: PChar;      // some variables to make the object manageable
+    Text: PChar;
+    Identifier: Cardinal;
+
+    Visible: Boolean;
+    Locked : Boolean;
+
+    property ParentLayerID: longint read _ParentLayerID write _ParentLayerID;
+    property UID: int64 read _UID;
+    property TagName: string read GetTagName;
+  end;
+
+
+  TVectorObjectGroup = class(TVectorObject)
+  private
+  protected
+    ObjectArray: TObjectArray;
+  public
+    function Add(new: TVectorObject):int64;
+    function  Find(UID: int64): TVectorObject;
+    procedure Remove(entry: int64; CanDestroy: Boolean = true);         overload;
+    procedure Remove(entry: TVectorObject; CanDestroy: Boolean = true); overload;
+
+    procedure SaveToXMLStructure(  var xml : IXMLNode); override;
+    procedure LoadFromXMLStructure(var xml : IXMLNode); override;
+  end;
+
+//end of type block
+
+
+type TSinglePoint = class(TVectorObject)
+private
+  function GetTagName :string; override;
+  function ConvertToInts: TPoint;
+  procedure ConvertToFloats(pt: TPoint);
+public
+  X, Y: double;
+
+  property Point: TPoint read ConvertToInts write ConvertToFloats;
+  
+  procedure SaveToXMLStructure(  var xml : IXMLNode); override;
+  procedure LoadFromXMLStructure(var xml : IXMLNode); override;
+end;
+
+
+
+type TPointGroup = class(TVectorObjectGroup)
+  constructor Create; override;
+  destructor Destroy; override;
+private
+  function GetTagName :string; override;
+  function  GetSinglePoint(Index: longint): TSinglePoint;
+  procedure SetSinglePoint(Index: longint; const Value: TSinglePoint);
+public
+  property Points[Index: Longint]: TSinglePoint read GetSinglePoint write SetSinglePoint;
+end;
+
+
+
+type TSinglePointReference = record
+  GroupUID : int64;
+  PointUID : int64;
+end;
+
+
+type TPointReferenceArray = Array of TSinglePointReference;
+
+
+
+type TSinglePolygon = class(TVectorObject)
+  constructor Create; override;
+  destructor Destroy; override;
+private
+  function GetTagName :string; override;
+public
+  Points: TPointReferenceArray;
+
+  procedure AddPointReference(PointUID, GroupUID: int64);
+
+  procedure SaveToXMLStructure(  var xml : IXMLNode); override;
+  procedure LoadFromXMLStructure(var xml : IXMLNode); override;
+end;
+
+
+
+type TPolygonGroup = class(TVectorObjectGroup)
+  constructor Create; override;
+  destructor Destroy; override;
+private
+  function GetTagName :string; override;
+  function  GetSinglePolygon(Index: longint): TSinglePolygon;
+  procedure SetSinglePolygon(Index: longint; const Value: TSinglePolygon);
+public
+  property Polygons[Index: Longint]: TSinglePolygon read GetSinglePolygon write SetSinglePolygon;
+end;
+
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+
+  // this structure belongs to an unfinished approach to realize "streaming layers" that are overwritten periodically by a streaming source.
+  // Unfortunately, TWAIN sucks at delivering more than 2-3 fps, so this was never realized.
+type TTWAINAcquisitionLayerInfo = record
+    SourceIdentifier    : DWORD;     // TW_Identity ID is TW_UINT32
+    TargetLayerPresetID : longint;   // set to -1 if not used
+    TargetLayerUsedID   : longint;   // will be filled in on OnTwainAcquire
+    ReuseTarget         : Boolean;   // for image stream-like behaviour, reuse a Layer and trigger OnLayerChanges afterwards
+end;
+
+
+type LongintProc = Procedure(Param: Longint) of object;
+
+type TPointArrayParamFunc = procedure(var pts: Array of TPoint) of object;
+
+type TGLMPreviewHookCallback = procedure(LayerID: integer; target: TBitmap; rct: TRect) of object;
+
+type TMouseClickEvent = procedure(Sender:TObject; X,Y: integer; Shift: TShiftState) of object;
+
+
+
+type TProjectionMode = (PM_DEFAULT_IMAGE, PM_SPHERICAL, PM_CYLINDRICAL, PM_RECTILINEAR, PM_OTHER);
+
+
+
+Type TImageProjectionInfo = class
+  alpha_h, alpha_v: double;
+  origin_x, origin_y : double;
+  projection: TProjectionMode;
+end;
+
+
+
+Type TFilterInstruction = Record
+    FilterID: Cardinal;
+    FilterData: Pointer;
+    FilterDataSize: Int64;
+    StreamObj: TMemoryStream;
+end; PFilterInstruction = ^TFilterInstruction;
+
+
+
+type TStandardFilterParameters = packed record
+  bool1, bool2, bool3, bool4: Boolean;
+  r1, r2, r3, r4: byte;
+  g1, g2, g3, g4: byte;
+  b1, b2, b3, b4: byte;
+  c1, c2, c3, c4: Cardinal;
+  i1, i2, i3, i4: integer;
+  s1, s2 : single;
+  d1, d2 : double;
+end; PStandardFilterParameters = ^TStandardFilterParameters;
+
+
+
+Type TSingleLayer = Record
+    InternalScaling: Single;   // ignore
+    Position: TPoint;          // absolute position in pixels
+    Transparency: Single;      // 0..1
+    data: TBitmap;             // pf24bit;
+    rawdata: TBitmap;
+    MaskLayerID: integer;         // mask as existing layer
+    UsedAsMaskLayer: Boolean;
+    LayerCaption: String[255];
+    visible: Boolean;
+    LayerID: longint;
+    FilterHeap: Array Of TFilterInstruction;
+    FilterHeapCursor: integer;
+    SelectableInDialog: Boolean;
+    IsSelectedInDialog: Boolean;
+    suppressed : Boolean; // suppress rendering of the layer, leave the job to a preview hook
+    ExternalEditWatcher: TDirectoryWatch;
+    LastModified: Longint; // last tickcount date of change
+    meta: TMetaData;
+end;
+
+
+
+type TRGBColor = packed record
+  case Integer of
+    1 : (col: Cardinal);
+    2 : (chans: Array[0..3] of byte);
+end;
+
+
+
+const
+  FT_CHROMINANCE = 0;
+  FT_DEPLETE_COLORS = 1;
+  FT_INVERT = 2;
+  FT_BRIGHTNESS_AND_CONTRAST = 3;
+  FT_BRIGHTNESS_BALANCER = 4;
+  {...}
+
+  COMMON_DATA_PATH = 'GraphicLW Files';
+  NODESTRUCT_ONCLICK_EVENT      = 0; // event array indices
+  NODESTRUCT_ONLEFTCLICK_EVENT  = 1;
+  NODESTRUCT_ONRIGHTCLICK_EVENT = 2;
+
+
+
+
+function LayerBoundsRect(var Layer: TSingleLayer): TRect;
+
+function AsRGB(color: TColor; DC: HDC = 0): TRGBColor;
+
+function GetNewUID: int64;
+
+
+
+implementation
+
+
+
+var
+  UID_NEW : int64;
+  CSEC    : _RTL_CRITICAL_SECTION;
+
+function GetNewUID: int64;
+begin
+  try
+    EnterCriticalSection(CSEC);
+    Result := UID_NEW;
+    inc(UID_NEW);
+    LeaveCriticalSection(CSEC);
+  except
+    Result := -GetTickCount;
+  end;
+end;
+
+
+
+function AsRGB(color: TColor; DC: HDC = 0): TRGBColor;
+var
+  rgbc: TRGBColor absolute color;
+  entry: PALETTEENTRY;
+const
+  cpSystemPalette  = $00;
+  cpActingPalette  = $01;
+  cpLogicalPalette = $02;
+  cpGenericPalette = $08;
+  cpNoColor        = $1F;
+  cpDefaultColor   = $20;
+  cpSystemColor    = $FF;
+begin
+  case rgbc.chans[3] of
+    cpGenericPalette, cpLogicalPalette:
+      begin
+        result.col := (rgbc.col and $00FFFFFF);
+      end;
+
+    cpNoColor, cpDefaultColor :
+      begin
+        result.col := rgbc.col;
+      end;
+
+    cpActingPalette :
+      begin
+        if (GetDeviceCaps(DC,RASTERCAPS) and RC_PALETTE) = RC_PALETTE then
+        begin
+          if 1 = GetPaletteEntries( GetCurrentObject(DC, OBJ_PAL),
+                                    rgbc.chans[0], 1, entry) then
+          begin
+            result.col      := $00000000;
+            result.chans[0] := entry.peRed;
+            result.chans[1] := entry.peGreen;
+            result.chans[2] := entry.peBlue;
+          end
+          else
+            result.col := PaletteIndex(rgbc.chans[0]);
+        end
+        else
+          result.col := PaletteIndex(rgbc.chans[0]);
+      end;
+
+    cpSystemPalette :
+      begin
+        result.col := PaletteIndex(rgbc.chans[0]);
+      end;
+
+    cpSystemColor :
+      begin
+        result.col := GetSysColor(rgbc.chans[0]);
+      end;
+
+  end;
+end;
+
+
+
+function LayerBoundsRect(var Layer: TSingleLayer): TRect;
+begin
+  result.TopLeft := Layer.Position;
+  result.Right := result.Left + ceil(Layer.data.Width  * Layer.InternalScaling);
+  result.Bottom := result.Top + ceil(Layer.data.Height * Layer.InternalScaling);
+end;
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+
+
+
+constructor TMetaData.Create;
+begin
+  Setlength(self.Entries, 0);
+  Setlength(self.Queries, 0);
+  TagName := 'container';
+end;
+
+
+
+destructor TMetaData.Destroy;
+begin
+
+  inherited;
+end;
+
+
+
+function TMetaData.Add(new: TObject):int64;
+var
+  i: integer;
+  CurrUID: int64;
+begin
+  for i := 0 to length(self.Entries)-1 do
+  begin
+    if Entries[i].obj = new then
+    begin
+      result := Entries[i].UID;
+      exit;
+    end;
+  end;
+
+  CurrUID := GetNewUID;
+  setlength(Entries,length(Entries)+1);
+  Entries[high(Entries)].UID := CurrUID;
+  Entries[high(Entries)].obj := new;
+  result := CurrUID;
+end;
+
+
+
+function  TMetaData.Find(UID: int64): TObject;
+var i: integer;
+begin
+  result := nil;
+  for i := 0 to length(self.Entries)-1 do
+  begin
+    if Entries[i].UID = UID then
+    begin
+      result := Entries[i].obj;
+      break;
+    end;
+  end;
+end;
+
+
+
+procedure TMetaData.Remove(entry: int64);
+var i, idx: integer;
+begin
+  idx := -1;
+  for i := 0 to length(self.Entries)-1 do
+  begin
+    if Entries[i].UID = entry then
+    begin
+      idx := i;
+      break;
+    end;
+  end;
+
+  if idx <> -1 then
+  begin
+    try
+      if assigned(Entries[idx].obj) then Entries[idx].obj.Destroy;
+    except
+    end;
+    Entries[idx] := Entries[high(Entries)];
+    setlength(Entries, length(entries)-1);
+  end;
+end;
+
+
+
+procedure TMetaData.Remove(entry: TObject);
+var i, idx: integer;
+begin
+  idx := -1;
+  for i := 0 to length(self.Entries)-1 do
+  begin
+    if Entries[i].obj = entry then
+    begin
+      idx := i;
+      break;
+    end;
+  end;
+
+  if idx <> -1 then
+  begin
+    try
+      if assigned(Entries[idx].obj) then Entries[idx].obj.Destroy;
+    except
+    end;
+    Entries[idx] := Entries[high(Entries)];
+    setlength(Entries, length(entries)-1);
+  end;
+end;
+
+
+procedure TMetaData.SaveToXMLStructure(IXMLDoc: IXMLDocument);
+var
+  idx: longint;
+  sheet : IXMLNode;
+begin
+  sheet := IXMLDoc.AddChild(self.TagName);
+
+  for idx := 0 to High(Entries) do
+    if (Entries[idx].obj is TXMLExportableObject) then
+       (Entries[idx].obj as TXMLExportableObject).SaveToXMLStructure(sheet);
+end;
+
+
+procedure TMetaData.SaveToFile(filename: string);
+var
+  xmldoc: IXMLDocument;
+begin
+  xmldoc := newXMLDocument;
+  xmldoc.Active := true;
+
+  self.SaveToXMLStructure(xmldoc);
+
+  xmldoc.SaveToFile(filename);
+  xmldoc.Active := False;
+end;
+
+procedure TMetaData.SaveToXMLStructure(  var xml : IXMLNode);
+var
+  idx: longint;
+  node : IXMLNode;
+begin
+  node := xml.AddChild(self.TagName);
+
+  for idx := 0 to High(Entries) do
+    if (Entries[idx].obj is TXMLExportableObject) then
+       (Entries[idx].obj as TXMLExportableObject).SaveToXMLStructure(node);
+end;
+
+
+procedure TMetaData.LoadFromXMLStructure(var xml : IXMLNode);
+begin
+end;
+
+
+
+function  TMetaData.QueryEntries(by_this_class: TClass): PQueryIndexList;
+var
+  i,
+  qidx,
+  cnt: integer;
+  CurrQUID: int64;
+begin
+  setlength(Queries,length(Queries)+1);
+  qidx := high(Queries);
+  CurrQUID := GetNewUID;
+  Queries[qidx].QueryID :=  CurrQUID;
+  setlength(Queries[qidx].UIDs,0);
+
+  cnt := 0;
+  for i := 0 to length(Entries)-1 do
+  begin
+    if Entries[i].obj.ClassType = by_this_class then
+    begin
+      inc(cnt);
+      setlength(Queries[qidx].UIDs, cnt);
+      Queries[qidx].UIDs[cnt-1] := Entries[i].UID;
+    end;
+  end;
+
+  result := @Queries[qidx];
+end;
+
+
+
+function  TMetaData.FindQuery(QUID: int64): PQueryIndexList;
+var i: integer;
+begin
+  result := nil;
+  for i := 0 to length(self.Queries)-1 do
+  begin
+    if Queries[i].QueryID = QUID then
+    begin
+      result := @Queries[i];
+      break;
+    end;
+  end;
+end;
+
+
+
+procedure TMetaData.FreeQuery(QUID: int64);
+var i, idx: integer;
+begin
+  idx := -1;
+  for i := 0 to length(Queries)-1 do
+  begin
+    if Queries[i].QueryID = QUID then
+    begin
+      idx := i;
+      break;
+    end;
+  end;
+
+  if idx <> -1 then
+  begin
+    setlength(Queries[idx].UIDs,0);
+    Queries[idx] := Queries[high(Queries)];
+    setlength(Queries,length(Queries)-1);
+  end;
+end;
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+
+constructor TVectorObject.Create;
+begin
+  inherited;
+  _ParentLayerID := -1;
+  _UID := GetNewUID;
+  Tag := nil;
+  Text := nil;
+  Identifier := 0;
+  Payload := nil;
+end;
+
+destructor TVectorObject.Destroy;
+begin
+  StrDispose(Text);
+  StrDispose(Tag);
+  if assigned(Payload) then
+  begin
+    // assume payload belongs to VectorObject: dispose of it
+  end;
+  inherited;
+end;
+
+
+///////////////////////////////////////////////////////////////////
+
+
+function TVectorObjectGroup.Add(new: TVectorObject):int64;
+var
+  i: integer;
+begin
+  for i := 0 to length(ObjectArray)-1 do
+  begin
+    if ObjectArray[i] = new then
+    begin
+      result := ObjectArray[i].UID;
+      exit;
+    end;
+  end;
+
+  setlength(ObjectArray,length(ObjectArray)+1);
+  ObjectArray[high(ObjectArray)] := new;
+  result := new.UID;
+end;
+
+
+
+function  TVectorObjectGroup.Find(UID: int64): TVectorObject;
+var i: integer;
+begin
+  result := nil;
+  for i := 0 to length(ObjectArray)-1 do
+  begin
+    if ObjectArray[i].UID = UID then
+    begin
+      result := ObjectArray[i];
+      break;
+    end;
+  end;
+end;
+
+
+
+procedure TVectorObjectGroup.Remove(entry: int64; CanDestroy: Boolean = true);
+var i, idx: integer;
+begin
+  idx := -1;
+  for i := 0 to length(ObjectArray)-1 do
+  begin
+    if ObjectArray[i].UID = entry then
+    begin
+      idx := i;
+      break;
+    end;
+  end;
+
+  if idx <> -1 then
+  begin
+    try
+      if assigned(ObjectArray[idx]) and CanDestroy then ObjectArray[idx].Destroy;
+    except
+    end;
+    for i := idx to High(ObjectArray)-1 do
+      ObjectArray[idx] := ObjectArray[idx + 1]; // remove without destroying the order
+    setlength(ObjectArray, length(ObjectArray)-1);
+  end;
+end;
+
+
+
+procedure TVectorObjectGroup.Remove(entry: TVectorObject; CanDestroy: Boolean = true);
+var i, idx: integer;
+begin
+  idx := -1;
+  for i := 0 to length(ObjectArray)-1 do
+  begin
+    if ObjectArray[i] = entry then
+    begin
+      idx := i;
+      break;
+    end;
+  end;
+
+  if idx <> -1 then
+  begin
+    try
+      if assigned(ObjectArray[idx]) and CanDestroy then ObjectArray[idx].Destroy;
+    except
+    end;
+    for i := idx to High(ObjectArray)-1 do
+      ObjectArray[idx] := ObjectArray[idx + 1]; // remove without destroying the order
+    setlength(ObjectArray, length(ObjectArray)-1);
+  end;
+end;
+
+
+procedure TVectorObjectGroup.SaveToXMLStructure(var xml : IXMLNode);
+var
+  node: IXMLNode;
+  idx : longint;
+begin
+  node := xml.AddChild(self.TagName);
+  node.Attributes['id'] := IntToStr(self._UID);
+  node.Attributes['tag'] := String(self.Tag);
+  node.Attributes['text'] := String(self.Text);
+
+  for idx := 0 to Length(ObjectArray)-1 do
+    ObjectArray[idx].SaveToXMLStructure(node);
+end;
+
+procedure TVectorObjectGroup.LoadFromXMLStructure(var xml : IXMLNode);
+begin
+end;
+
+
+///////////////////////////////////////////////////////////////////
+
+
+
+function TSinglePoint.ConvertToInts: TPoint;
+begin
+  Result.X := round(X);
+  Result.Y := round(Y);
+end;
+
+procedure TSinglePoint.ConvertToFloats(pt: TPoint);
+begin
+  X := pt.X;
+  Y := pt.Y;
+end;
+
+function TSinglePoint.GetTagName :string;
+begin
+  result := 'point';
+end;
+
+procedure TSinglePoint.SaveToXMLStructure(var xml : IXMLNode);
+var
+  node: IXMLNode;
+begin
+  node := xml.AddChild(self.TagName);
+  node.Attributes['id'] := IntToStr(self._UID);
+  node.Attributes['tag'] := String(self.Tag);
+  node.Attributes['text'] := String(self.Text);
+
+  node.AddChild('x').Text := FloatToStr(X);
+  node.AddChild('y').Text := FloatToStr(Y);
+end;
+
+procedure TSinglePoint.LoadFromXMLStructure(var xml : IXMLNode);
+begin
+end;
+
+
+
+constructor TPointGroup.Create;
+begin
+  inherited;
+  setlength(self.ObjectArray, 0);
+end;
+
+destructor TPointGroup.Destroy;
+var i: integer;
+begin
+  for i := 0 to length(ObjectArray) -1 do
+    if assigned(Points[i]) then ObjectArray[i].Destroy;
+  setlength(ObjectArray, 0);
+  inherited;
+end;
+
+function TPointGroup.GetTagName :string;
+begin
+  result := 'pointgroup';
+end;
+
+function  TPointGroup.GetSinglePoint(Index: longint): TSinglePoint;
+begin
+  if (Index >= 0) and (Index < Length(ObjectArray)) then
+    result := (ObjectArray[Index] as TSinglePoint)
+  else
+    result := nil;
+end;
+
+procedure TPointGroup.SetSinglePoint(Index: longint; const Value: TSinglePoint);
+begin
+  if (Index >= 0) and (Index < Length(ObjectArray)) then
+    ObjectArray[Index] := Value;
+end;
+
+
+
+
+constructor TSinglePolygon.Create;
+begin
+  inherited;
+  setlength(self.Points, 0);
+end;
+
+destructor TSinglePolygon.Destroy;
+begin
+  setlength(self.Points, 0); // dispose references
+  inherited;
+end;
+
+function TSinglePolygon.GetTagName :string;
+begin
+  result := 'polygon';
+end;
+
+procedure TSinglePolygon.AddPointReference(PointUID, GroupUID: int64);
+begin
+  setlength(Points, Length(Points)+1);
+  Points[High(Points)].GroupUID := GroupUID;
+  Points[High(Points)].PointUID := PointUID;
+end;
+
+procedure TSinglePolygon.SaveToXMLStructure(var xml : IXMLNode);
+var
+  node: IXMLNode;
+  subnode : IXMLNode;
+  idx: longint;
+begin
+  node := xml.AddChild(self.TagName);
+  node.Attributes['id'] := IntToStr(self._UID);
+  node.Attributes['tag'] := String(self.Tag);
+  node.Attributes['text'] := String(self.Text);
+
+  for idx := 0 to Length(Points)-1 do
+  begin
+    subnode := node.AddChild('pointref');
+    subnode.AddChild('groupid').Text := IntToStr(Points[idx].GroupUID);
+    subnode.AddChild('pointid').Text := IntToStr(Points[idx].PointUID);
+  end;
+end;
+
+procedure TSinglePolygon.LoadFromXMLStructure(var xml : IXMLNode);
+begin
+end;
+
+
+
+constructor TPolygonGroup.Create;
+begin
+  inherited;
+  setlength(self.ObjectArray, 0);
+end;
+
+destructor TPolygonGroup.Destroy;
+var i: integer;
+begin
+  for i := 0 to length(ObjectArray) -1 do
+    if assigned(ObjectArray[i]) then ObjectArray[i].Destroy;
+  setlength(ObjectArray, 0);
+  inherited;
+end;
+
+function TPolygonGroup.GetTagName :string;
+begin
+  result := 'polygongroup';
+end;
+
+function  TPolygonGroup.GetSinglePolygon(Index: longint): TSinglePolygon;
+begin
+  if (Index >= 0) and (Index < Length(ObjectArray)) then
+    result := (ObjectArray[Index] as TSinglePolygon)
+  else
+    result := nil;
+end;
+
+procedure TPolygonGroup.SetSinglePolygon(Index: longint; const Value: TSinglePolygon);
+begin
+  if (Index >= 0) and (Index < Length(ObjectArray)) then
+    ObjectArray[Index] := Value;
+end;
+
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+
+
+
+initialization
+  UID_NEW := 1;
+  InitializeCriticalSection(CSEC);
+finalization
+  DeleteCriticalSection(CSEC);
+end.

@@ -1,0 +1,145 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls,
+  UIntHandler, GLWDef, GraphicLayerManager, VisualOverlayClass;
+
+
+
+type
+  TForm1 = class(TForm)
+    GroupBox1: TGroupBox;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
+    GroupBox2: TGroupBox;
+    Memo1: TMemo;
+    Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
+    CheckBox1: TCheckBox;
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure Button7Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure FormPaint(Sender: TObject);
+  private
+    CurrentHandler: TUserInteractionHandler;
+  public
+    PointGroup: TPointGroup;
+    container : TMetaData;
+    procedure Repaint(Sender: TObject);
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  memo1.clear;
+  CurrentHandler := nil;
+
+  container  := TMetaData.Create;
+  PointGroup := TPointGroup.Create;
+  container.Add(PointGroup);
+end;
+
+
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  CurrentHandler := nil;
+end;
+
+procedure TForm1.Button7Click(Sender: TObject);
+begin
+  container.SaveToFile('container.xml');
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  container.Destroy;
+  PointGroup.Destroy;
+end;
+
+
+
+procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseDown(Sender, Button, Shift, X, Y);
+end;
+
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseMove(Sender, Shift, X, Y);
+end;
+
+procedure TForm1.FormMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if assigned(CurrentHandler) then
+    CurrentHandler.MouseUp(Sender, Button, Shift, X, Y);
+end;
+
+procedure TForm1.FormPaint(Sender: TObject);
+begin
+  Repaint(Self);
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  CurrentHandler := DefaultCreatePointHandler;
+  CurrentHandler.Connect( TGraphicLayerManager(Pointer(1)),
+                          TVisualOverlay(Pointer(2)),
+                          PointGroup,
+                          nil,
+                          nil,
+                          Self.Repaint);
+
+end;
+
+procedure TForm1.Repaint(Sender: TObject);
+var
+  idx: integer;
+  OnePoint: TSinglePoint;
+begin
+  Canvas.Brush.Color := form1.Color;
+  Canvas.Pen.Color := clBlack;
+
+  Canvas.FillRect(Rect(0,0,640,640));
+
+  for idx := 0 to PointGroup.Count - 1 do
+  begin
+    OnePoint := PointGroup.Items[idx] as TSinglePoint;
+    Canvas.Ellipse(OnePoint.Point.X-5, OnePoint.Point.Y-5,
+                   OnePoint.Point.X+6, OnePoint.Point.Y+6);
+    Canvas.MoveTo(OnePoint.Point.X, OnePoint.Point.Y-10);
+    Canvas.LineTo(OnePoint.Point.X, OnePoint.Point.Y+10);
+    Canvas.MoveTo(OnePoint.Point.X-10, OnePoint.Point.Y);
+    Canvas.LineTo(OnePoint.Point.X+10, OnePoint.Point.Y);
+  end;
+end;
+
+
+
+
+end.

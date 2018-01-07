@@ -1,0 +1,220 @@
+object PanoRectSettingsDlg: TPanoRectSettingsDlg
+  Left = 358
+  Top = 131
+  BorderStyle = bsToolWindow
+  Caption = 'viewport settings'
+  ClientHeight = 227
+  ClientWidth = 250
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object GroupBox1: TGroupBox
+    Left = 0
+    Top = 2
+    Width = 250
+    Height = 225
+    Caption = 'viewport settings'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 0
+    OnClick = GroupBox1Click
+    object Label1: TLabel
+      Left = 12
+      Top = 20
+      Width = 132
+      Height = 13
+      Caption = 'equivalent focal length (mm)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label2: TLabel
+      Left = 12
+      Top = 70
+      Width = 85
+      Height = 13
+      Caption = 'polar angle (theta)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label3: TLabel
+      Left = 12
+      Top = 120
+      Width = 90
+      Height = 13
+      Caption = 'azimutal angle (phi)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label4: TLabel
+      Left = 12
+      Top = 170
+      Width = 75
+      Height = 13
+      Caption = 'viewport tilt (psi)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+    end
+    object ftracker: TTrackBar
+      Tag = 2000
+      Left = 59
+      Top = 31
+      Width = 185
+      Height = 41
+      HelpType = htKeyword
+      Max = 80000
+      Min = 300
+      Frequency = 1000
+      Position = 2000
+      TabOrder = 0
+      TickMarks = tmBoth
+      OnChange = TrackerChange
+      OnKeyPress = TrackerKeyPress
+    end
+    object ftext: TEdit
+      Left = 12
+      Top = 42
+      Width = 45
+      Height = 18
+      BevelKind = bkFlat
+      BorderStyle = bsNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      MaxLength = 8
+      ParentFont = False
+      TabOrder = 1
+      Text = '20'
+      OnChange = TextChange
+      OnClick = EditClick
+    end
+    object thetatext: TEdit
+      Left = 12
+      Top = 92
+      Width = 45
+      Height = 18
+      BevelKind = bkFlat
+      BorderStyle = bsNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      MaxLength = 8
+      ParentFont = False
+      TabOrder = 2
+      Text = '90'
+      OnChange = TextChange
+      OnClick = EditClick
+    end
+    object thetatracker: TTrackBar
+      Left = 59
+      Top = 81
+      Width = 185
+      Height = 41
+      HelpType = htKeyword
+      Max = 9000
+      Min = -9000
+      Frequency = 1000
+      TabOrder = 3
+      TickMarks = tmBoth
+      OnChange = TrackerChange
+      OnKeyPress = TrackerKeyPress
+    end
+    object phitext: TEdit
+      Left = 12
+      Top = 142
+      Width = 45
+      Height = 18
+      BevelKind = bkFlat
+      BorderStyle = bsNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      MaxLength = 8
+      ParentFont = False
+      TabOrder = 4
+      Text = '0'
+      OnChange = TextChange
+      OnClick = EditClick
+    end
+    object phitracker: TTrackBar
+      Left = 59
+      Top = 131
+      Width = 185
+      Height = 41
+      HelpType = htKeyword
+      Max = 18000
+      Min = -18000
+      Frequency = 1000
+      TabOrder = 5
+      TickMarks = tmBoth
+      OnChange = TrackerChange
+      OnKeyPress = TrackerKeyPress
+    end
+    object psitext: TEdit
+      Left = 12
+      Top = 192
+      Width = 45
+      Height = 18
+      BevelKind = bkFlat
+      BorderStyle = bsNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      MaxLength = 8
+      ParentFont = False
+      TabOrder = 6
+      Text = '0'
+      OnChange = TextChange
+      OnClick = EditClick
+    end
+    object psitracker: TTrackBar
+      Left = 59
+      Top = 181
+      Width = 185
+      Height = 41
+      HelpType = htKeyword
+      Max = 18000
+      Min = -18000
+      Frequency = 1000
+      TabOrder = 7
+      TickMarks = tmBoth
+      OnChange = TrackerChange
+      OnKeyPress = TrackerKeyPress
+    end
+  end
+end

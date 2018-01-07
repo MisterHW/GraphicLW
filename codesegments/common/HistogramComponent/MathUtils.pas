@@ -1,0 +1,118 @@
+unit MathUtils;
+
+interface
+uses classes;
+
+  function CloneStream(inp: TMemorystream):TMemoryStream;
+  procedure SortSingleData(Data: Pointer; size: longint);
+  procedure SortCardinalData(Data: Pointer; blocks: Cardinal);
+
+
+implementation
+
+  type
+    PSingle = ^single;
+    PCardinal = ^Cardinal;
+
+
+
+  function CloneStream(inp: TMemorystream):TMemoryStream;
+  begin
+    result := TMemorystream.Create;
+    inp.SaveToStream(result);
+  end;
+
+
+
+  procedure SortSingleData(Data: Pointer; size: longint);
+
+    function ReadSingle(idx: Cardinal): single;
+    begin
+      result := Psingle(Cardinal(data)+ idx shl 2)^;
+    end;
+
+    procedure WriteSingle(idx: Cardinal; val: single);
+    begin
+      PSingle(Cardinal(data)+ idx shl 2)^ := val;
+    end;
+
+   procedure quicksort(Data: Pointer;bereichsanfang, bereichsende: Integer);
+   var
+      links, rechts       : integer;
+      zerlegendes_element : single;
+      tauschpuffer        : single;
+
+   begin
+      if (bereichsende-bereichsanfang > 0) then {Abbruchbedingung}
+      begin
+
+         links  := (bereichsanfang-1);
+         rechts := (bereichsende);
+         zerlegendes_element := readsingle(bereichsende);
+
+         repeat
+            repeat inc(links) until
+               (readsingle(links) >= zerlegendes_element);
+            repeat dec(rechts) until (rechts <= 0) or 
+               (readsingle(rechts) <= zerlegendes_element);
+            tauschpuffer := readsingle(links);
+            writesingle(links,readsingle(rechts));
+            writesingle(rechts,tauschpuffer);
+         until rechts <= links;
+
+      writesingle(rechts,       readsingle(links));
+      writesingle(links,        readsingle(bereichsende));
+      writesingle(bereichsende, tauschpuffer);
+
+      if (bereichsanfang >= 0) and (links-1 >=bereichsanfang) then
+        quicksort(Data,bereichsanfang,links-1);         {zwei rekursive}
+      if (links+1 >= 0) and (bereichsende >= links+1) then
+        quicksort(Data,links+1       ,bereichsende);    {Aufrufe       }
+      end
+   end;
+
+  begin
+     quicksort(Data,0,size div 4-1);
+  end;
+
+
+
+  procedure SortCardinalData(Data: Pointer; blocks: cardinal);
+
+   procedure quicksort(bereichsanfang, bereichsende: Cardinal);
+   var
+      links, rechts       : PCardinal;
+      zerlegendes_element : Cardinal;
+      tauschpuffer        : Cardinal;
+   begin
+      if (longint(bereichsende)-longint(bereichsanfang) > 0) then {Abbruchbedingung}
+      begin
+         links  := PCardinal(bereichsanfang-4);
+         rechts := PCardinal(bereichsende);
+         zerlegendes_element := PCardinal(bereichsende)^;
+
+         repeat
+            repeat links := PCardinal(Cardinal(links) + 4) until
+               (links^ >= zerlegendes_element);
+            repeat rechts := PCardinal(Cardinal(rechts) - 4) until
+               (rechts^ <= zerlegendes_element);
+            tauschpuffer := links^; links^ := rechts^; rechts^ := tauschpuffer; // swap
+         until Cardinal(rechts) <= Cardinal(links);
+
+        rechts^ := links^;
+        links^  := PCardinal(bereichsende)^;
+        PCardinal(bereichsende)^:= tauschpuffer;
+
+        if Cardinal(bereichsanfang) >= Cardinal(Data) then
+          quicksort(bereichsanfang,Cardinal(links)-4);         {zwei rekursive}
+        if Cardinal(links)+4 >= Cardinal(Data) then
+        quicksort(Cardinal(links)+4       ,bereichsende);    {Aufrufe       }
+      end;
+   end;
+
+  begin
+     quicksort(Cardinal(Data),Cardinal(Data)+(blocks-1) shl 2);
+  end;
+
+
+end.

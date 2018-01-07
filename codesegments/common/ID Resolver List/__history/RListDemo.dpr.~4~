@@ -1,0 +1,67 @@
+program RListDemo;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils, Windows,
+  RList in 'RList.pas';
+
+
+var
+  list: TResoverList;
+  i: integer;
+  stamp: longint;
+  thisID: longint;
+begin
+  list := TResoverList.Create;
+
+  randomize;
+
+
+  List.Clear;
+
+  for i  := 0 to 20 do
+    List.Append(Pointer(i),round(1000 * random));
+
+  for i  := 0 to 20 do
+    writeln(List.Items[i].ID);
+
+  readln;
+
+  List.SortByID;
+
+  for i  := 0 to 20 do
+    writeln(List.Items[i].ID);
+
+  readln;
+
+
+  writeln('speed test (ID)');
+
+  List.Clear;
+
+  for i  := 0 to 100000 do
+    List.Append(Pointer(i),i);
+
+  stamp := GetTickCount;
+  for i  := 1 to 100000 do
+  begin
+    thisID :=  round(random*100000);
+    List.IndexByID(thisID);
+  end;
+
+  writeln('Lookup by ID: ',GetTickCount-stamp,' ms');
+  writeln('speed test (non-indexed)');
+
+  stamp := GetTickCount;
+  for i  := 1 to 100000 do
+  begin
+    thisID :=  round(random*100000);
+    List.IndexByObj(Pointer(thisID));
+  end;
+
+  writeln('Lookup (non-indexed): ',GetTickCount-stamp,' ms');
+  readln;
+
+  list.Destroy;
+end.

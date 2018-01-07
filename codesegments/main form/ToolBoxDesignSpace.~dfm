@@ -1,0 +1,52 @@
+object ToolBoxDesignFrame: TToolBoxDesignFrame
+  Left = 583
+  Top = 534
+  Width = 716
+  Height = 524
+  Caption = 'ToolBox Design Space'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PageControl1: TPageControl
+    Left = 0
+    Top = 0
+    Width = 708
+    Height = 497
+    ActivePage = TabSheet1
+    Align = alClient
+    TabOrder = 0
+    object TabSheet1: TTabSheet
+      Caption = 'TabSheet1'
+      object GroupBox1: TGroupBox
+        Left = 24
+        Top = 96
+        Width = 249
+        Height = 200
+        Caption = 'Vector Tools'
+        TabOrder = 0
+      end
+      object GroupBox2: TGroupBox
+        Left = 48
+        Top = 120
+        Width = 249
+        Height = 500
+        Caption = 'Manage Vector Objects'
+        TabOrder = 1
+      end
+      object GroupBox3: TGroupBox
+        Left = 72
+        Top = 144
+        Width = 249
+        Height = 100
+        Caption = 'Import / Export'
+        TabOrder = 2
+      end
+    end
+  end
+end

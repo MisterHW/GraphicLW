@@ -1,0 +1,81 @@
+unit trigonometry;
+
+interface
+
+Type TVector3d = record
+  x, y, z: double;
+end;
+
+type TRMatrix = record
+  m11, m12, m13,
+  m21, m22, m23,
+  m31, m32, m33 : single;
+end;
+
+
+
+function CrossProduct(var v1, v2: TVector3d):TVector3d;
+function ScalarProduct (var v1, v2: TVector3d): double;
+procedure ScaleVector(var Vector: TVector3d; scale: double);
+function PolarToCartesian(r, theta, phi: double):TVector3d;
+function AssociatedRotation3D(var Normal: TVector3d; angle: double): TRMatrix;
+function MatrixTimesVector(var M: TRMatrix; var Vector: TVector3d):TVector3d;
+
+implementation
+
+uses math;
+
+function CrossProduct(var v1, v2: TVector3d):TVector3d;
+begin
+  result.x := v1.y * v2.z - v1.z * v2.y;
+  result.y := v1.z * v2.x - v1.x * v2.z;
+  result.z := v1.x * v2.y - v1.y * v2.x;
+end;
+
+function ScalarProduct (var v1, v2: TVector3d): double;
+begin
+  result := v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+end;
+
+procedure ScaleVector(var Vector: TVector3d; scale: double);
+begin
+  Vector.x := Vector.x * scale;
+  Vector.y := Vector.y * scale;
+  Vector.z := Vector.z * scale;
+end;
+
+function PolarToCartesian(r, theta, phi: double):TVector3d;
+begin
+  result.x := r * sin(theta) * cos(phi);
+  result.y := r * sin(theta) * sin(phi);
+  result.z := r * cos(theta);
+end;
+
+function AssociatedRotation3D(var Normal: TVector3d; angle: double): TRMatrix;
+var
+  sn, cs: double;
+begin
+  sn := sin(angle);
+  cs := cos(angle);
+
+  with Normal do
+  with result do
+  begin
+    m11 :=   cs + x*x*(1-cs);   m12 := x*y*(1-cs) - z*sn;   m13 := x*z*(1-cs) + y*sn;
+    m21 := y*x*(1-cs) + z*sn;   m22 := cs + y*y*(1-cs);     m23 := y*z*(1-cs) - x*sn;
+    m31 := z*x*(1-cs) - y*sn;   m32 := z*y*(1-cs) + x*sn;   m33 := cs + z*z*(1-cs);
+  end;
+end;
+
+function MatrixTimesVector(var M: TRMatrix; var Vector: TVector3d):TVector3d;
+begin
+  with Vector do
+  with M do
+  begin
+    result.x := m11 * x + m12 * y + m13 * z;
+    result.y := m21 * x + m22 * y + m23 * z;
+    result.z := m31 * x + m32 * y + m33 * z;
+  end;
+end;
+
+end.

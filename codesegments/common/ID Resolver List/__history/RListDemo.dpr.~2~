@@ -1,0 +1,39 @@
+program RListDemo;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils,
+  RList in 'RList.pas';
+
+
+var
+  list: TResoverList;
+  i: integer;
+begin
+  list := TResoverList.Create;
+
+  randomize;
+
+  while true do
+  begin
+  List.Clear;
+
+  for i  := 0 to 20 do
+    List.Append(nil,round(1000 * random));
+
+  for i  := 0 to 20 do
+    writeln(List.Items[i].ID);
+
+  readln;
+
+  List.SortByID;
+
+  for i  := 0 to 20 do
+    writeln(List.Items[i].ID);
+
+  readln;
+  end;
+
+  list.Destroy;
+end.

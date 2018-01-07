@@ -1,0 +1,693 @@
+unit LayerSelectDlg;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, StdCtrls, GLWDef, Math, ComCtrls, ToolWin, Menus,
+  MultiFunctionalInputDialog;
+
+
+
+type TDockMode = (dm_none, dm_left, dm_top, dm_right, dm_bottom);
+
+
+
+type
+  TLayerSelectDlg = class(TForm)
+
+    Panel1: TPanel;
+    okbutton: TButton;
+    abortbutton: TButton;
+    DockOptPopup: TPopupMenu;
+    docktotop: TMenuItem;
+    docktoleft2: TMenuItem;
+    docktoright1: TMenuItem;
+    docktobottom1: TMenuItem;
+    centerwindow1: TMenuItem;
+    LayerCaptionLabel: TLabel;
+    LayerInfoLabel: TLabel;
+    constructor Create(Sender:TComponent; dm: TDockMode = dm_none ); reintroduce;
+    destructor Destroy; override;
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure abortbuttonClick(Sender: TObject);
+    procedure okbuttonClick(Sender: TObject);
+    procedure FormDblClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure abortbuttonMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure okbuttonMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure DockTopClick(Sender: TObject);
+    procedure DockLeftClick(Sender: TObject);
+    procedure docktoright1Click(Sender: TObject);
+    procedure docktobottom1Click(Sender: TObject);
+    procedure centerwindow1Click(Sender: TObject);
+    procedure UpdateDockStyle(Sender: TObject);
+    procedure SetBounds(Sender: TObject); reintroduce;
+    procedure DockOptPopupPopup(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure LayerCaptionLabelDblClick(Sender: TObject);
+
+  private
+    buffer : TBitmap;
+    a: integer;
+    lastmousepoint: TPoint;
+    LastCellLayerID: integer;
+    dockmode: TDockMode;
+    fLastClickedIconLayerID: longint;
+    procedure SetLastClickedIconLayerID(newLayerID: longint);
+    property LastClickedIconLayerID: longint read fLastClickedIconLayerID write SetLastClickedIconLayerID;
+  public
+    RemoteGLM : TObject;
+    isdone: boolean;
+    success : boolean;
+    multiselect: boolean;
+    OnForcedLayerChange: LongintProc;
+    procedure LayersChangedNotification(Sender: TObject);
+    procedure Paint; override;
+    procedure DlgShow(Sender:TObject);
+    procedure DeselectAll;
+    procedure SelectLayer(LayerID: integer);
+    function SelectedLayersCount: integer;
+    property LastDockMode: TDockMode read dockmode;
+
+  end;
+
+
+
+
+implementation
+
+uses
+  GraphicLayerManager, GLMFunctionality;
+
+{$R *.dfm}
+
+
+
+constructor TLayerSelectDlg.Create(Sender:TComponent; dm: TDockMode = dm_none);
+begin
+  inherited Create(Sender);
+
+  if dm = dm_none then
+      self.BorderStyle := bsToolWindow
+    else
+      self.BorderStyle := bsNone;
+
+  self.OnShow := self.DlgShow;
+  isdone := false;
+  buffer := TBitmap.Create;
+  buffer.PixelFormat := pf24bit;
+  self.Color := $E0E0E0;
+  buffer.Canvas.Brush.Color := $E0E0E0;
+  DockMode := dm;
+  buffer.Width := self.ClientWidth;
+  buffer.Height := self.ClientHeight-panel1.Height;
+  self.success := false;
+  LastClickedIconLayerID := -1;
+end;
+
+
+
+destructor TLayerSelectDlg.Destroy;
+begin
+  buffer.Destroy;
+  inherited;
+end;
+
+
+
+procedure TLayerSelectDlg.LayersChangedNotification(Sender: TObject);
+var
+  glm : TGraphicLayerManager;
+  i, x, y, xtiles: integer;
+  outrect: TRect;
+
+begin
+  glm := self.RemoteGLM as TGraphicLayerManager;
+
+  if length(glm.Layers) = 0 then self.abortbutton.Click;
+
+  buffer.Canvas.Brush.Color := self.Color;
+  buffer.Canvas.FillRect(buffer.Canvas.ClipRect);
+  a := GLMFunctionality.FindMaximumSquareTileSize(
+    length(glm.Layers),
+    buffer.Width,buffer.Height);
+  xtiles := buffer.Width div a;
+
+  okbutton.Enabled := false;
+  buffer.Canvas.Brush.Color := clgray;
+  for i := 0 to length(glm.Layers)-1 do
+  begin
+    buffer.Canvas.Brush.Color := $F0F0F0;
+
+    x := a * (i mod xtiles);
+    y := a * (i div xtiles);
+    buffer.Canvas.Pen.Color := clblack;
+    if not glm.Layers[i].SelectableInDialog then
+      buffer.Canvas.Pen.Color := clred
+      else if glm.Layers[i].IsSelectedInDialog then
+        begin
+          buffer.Canvas.Pen.Color := cllime;
+          okbutton.Enabled := true;
+        end
+        else
+          if glm.Layers[i].visible then
+            buffer.Canvas.Pen.Color := clblue;
+
+    buffer.Canvas.Pen.Width := 2;
+    buffer.Canvas.Rectangle(x+4,y+4,x+a-4,y+a-4);
+
+    outrect := GLMFunctionality.CalculateThumbnailArea(
+      rect(x+4,y+4,x+a-4,y+a-4),
+      2,
+      glm.Layers[i].data.Width,
+      glm.Layers[i].data.Height);
+
+    GLMFunctionality.StretchCopyRect(
+      glm.layers[i].data,
+      buffer,
+      glm.layers[i].data.Canvas.ClipRect,
+      outrect);
+
+    // layer decoration: layer used as mask layer = two squares
+    if glm.Layers[i].UsedAsMaskLayer then
+    begin
+      buffer.Canvas.Brush.Color := clwhite;
+      buffer.Canvas.FillRect(rect(x+6,y+6,x+6+16,y+6+16));
+      buffer.Canvas.FillRect(rect(x+6+6,y+6+6,x+6+16+6,y+6+16+6));
+      buffer.Canvas.Brush.Color := clsilver;
+      buffer.Canvas.FillRect(rect(x+6+6,y+6+6,x+6+16,y+6+16));
+      buffer.Canvas.Brush.Color := clblack;
+      buffer.Canvas.FrameRect(rect(x+6,y+6,x+6+16,y+6+16));
+      buffer.Canvas.FrameRect(rect(x+6+6,y+6+6,x+6+16+6,y+6+16+6));
+    end;
+    // layer decoration: external processing = checkerboard pattern
+    if assigned(glm.Layers[i].ExternalEditWatcher) then
+      DrawChessBoardOverlay(buffer,rect(x+4,y+4,x+a-4,y+a-4));
+  end;
+  self.Paint;
+
+  SetLastClickedIconLayerID(LastClickedIconLayerID); // update info
+end;
+
+
+
+procedure TLayerSelectDlg.Paint;
+begin
+  inherited;
+  self.Canvas.CopyRect(self.ClientRect,buffer.Canvas,self.ClientRect);
+end;
+
+
+
+procedure TLayerSelectDlg.DlgShow(Sender:TObject);
+var
+  abortvisible, okvisible : Boolean;
+begin
+  self.LayersChangedNotification(Sender);  // calculate tile size, tiling and draw to buffer
+
+  abortvisible := self.abortbutton.Visible;
+  okvisible    := self.okbutton.Visible;
+  self.abortbutton.Visible := false;
+  self.okbutton.Visible    := false;
+
+  self.Show;
+  Application.ProcessMessages;
+
+  self.abortbutton.Visible := abortvisible;
+  self.okbutton.Visible    := okvisible;
+end;
+
+
+
+procedure TLayerSelectDlg.FormMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  layernum,i : integer;
+  glm : TGraphicLayerManager;
+begin
+  glm := self.RemoteGLM as TGraphicLayerManager;
+  self.lastmousepoint := Point(x,y);
+
+  if X > (buffer.width div a)*a then exit;
+  if Y > (buffer.Height div a)*a then exit;
+  layernum := (x div a) + (buffer.width div a)*(y div a) ;
+  if layernum > length(glm.layers)-1 then exit;
+
+  LastClickedIconLayerID := glm.layers[layernum].LayerID;
+
+  if mbLeft = Button then
+  begin
+
+  if not  glm.Layers[layernum].SelectableInDialog then exit;
+  begin
+    if self.multiselect
+      then
+        glm.Layers[layernum].IsSelectedInDialog := not glm.Layers[layernum].IsSelectedInDialog
+      else
+        begin
+          for i:= 0 to length(glm.Layers) - 1 do glm.Layers[i].IsSelectedInDialog := false;
+          glm.Layers[layernum].IsSelectedInDialog := true;
+        end;
+    if glm.Layers[layernum].IsSelectedInDialog then self.LastCellLayerID := glm.Layers[layernum].LayerID;
+    self.LayersChangedNotification(self); 
+  end;
+
+  end;
+
+  if mbRight = Button then
+  begin
+    LastCellLayerID := glm.Layers[layernum].LayerID;
+    if (ssCtrl in Shift) or not panel1.Visible  then glm.FocusLayer(layernum);
+  end;
+
+end;
+
+
+
+procedure TLayerSelectDlg.abortbuttonClick(Sender: TObject);
+begin
+  isdone := true;
+end;
+
+
+
+procedure TLayerSelectDlg.okbuttonClick(Sender: TObject);
+begin
+  isdone  := true;
+  success := true;
+end;
+
+
+
+procedure TLayerSelectDlg.FormDblClick(Sender: TObject);
+var
+  layernum : integer;
+  glm : TGraphicLayerManager;
+begin
+  glm := self.RemoteGLM as TGraphicLayerManager;
+
+  if lastmousepoint.X > (buffer.width div a)*a then exit;
+  if lastmousepoint.Y > (buffer.Height div a)*a then exit;
+  layernum := (lastmousepoint.x div a) + (buffer.width div a)*(lastmousepoint.y div a) ;
+  if layernum > length(glm.layers)-1 then exit;
+
+  if (not self.multiselect) and (0 = GetAsyncKeyState($09)) then
+  begin
+    if self.okbutton.Enabled then self.okbutton.Click;
+  end;
+end;
+
+
+
+procedure TLayerSelectDlg.DeselectAll;
+var
+  i: integer;
+  glm : TGraphicLayerManager;
+begin
+  LastCellLayerID := -1;
+  glm := self.RemoteGLM as TGraphicLayerManager;
+  for i := 0 to length(glm.Layers) -1 do
+    glm.Layers[i].IsSelectedInDialog := false;
+end;
+
+
+
+procedure TLayerSelectDlg.SelectLayer(LayerID: integer);
+var
+  LayerIdx, i: integer;
+  glm : TGraphicLayerManager;
+begin
+  glm := self.RemoteGLM as TGraphicLayerManager;
+
+  LayerIdx := glm.LayerByID(LayerID);
+  if LayerIdx = -1 then exit;
+  LastClickedIconLayerID := LayerID;
+
+  LastCellLayerID := LayerID;
+  for i := 0 to length(glm.Layers) -1 do
+    glm.Layers[i].IsSelectedInDialog := (i = LayerIdx);
+end;
+
+
+
+procedure TLayerSelectDlg.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+   case Key of
+     #13: if okbutton.Enabled then okbuttonClick(self); // ENTER
+     #27: abortbuttonClick(self);                       // ESC
+     #113: begin                                        // F2
+             LayerCaptionLabel.OnClick(self);
+           end;
+   end;
+end;
+
+
+
+procedure TLayerSelectDlg.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  glm : TGraphicLayerManager;
+  n: integer;
+  vKey: Char;
+
+
+  procedure ChangeSingleSelection(dx, dy: integer);
+  var
+    //LayerIdx: integer;
+    i: integer;
+  begin
+    if(self.selectedLayersCount = 0) and (length(glm.Layers) > 0) then // initialize: select the first layer available, done.
+    begin
+      for i := 0 to length(glm.Layers)-1 do
+        if glm.Layers[i].SelectableInDialog then
+        begin
+          //LayerIdx := i;
+          self.DeselectAll;
+          self.SelectLayer(glm.Layers[i].LayerID); // LastCellLayerID is set now
+          self.LayersChangedNotification(self);
+          exit;
+        end;
+    end; // if count = 0, #layers >0
+
+
+    // since key events are handled sequencially,
+    // the walking direction is given by either dx or. different signs do not
+    // occur (e.g. dx=+1, dy=-1, effective walking step would be dx + xtiles*y < 0, which would
+    // trigger the (dx = +1) condition, causing a search in the positive direction, starting from
+    // a layer tile with a smaller index.
+
+    if not multiselect then // hier bräuchte es für multiselect noch einen Vorwahlrahmen,
+                            // mit dem man dan mit +/- hinzufügen / entfernen kann
+    begin
+      if (dx + n*dy > 0) and (glm.LayerByID(LastCellLayerID) <> -1) then
+        for i := glm.LayerByID(LastCellLayerID)+dx+n*dy to length(glm.Layers)-1 do  // go forward until a selectable layer is found, select it and exit;
+         if glm.Layers[i].SelectableInDialog then
+         begin
+           //LayerIdx := i;
+           self.DeselectAll;
+           self.SelectLayer(glm.Layers[i].LayerID);
+           self.LayersChangedNotification(self);
+           exit;
+         end;
+
+      if (dx + n*dy < 0) and (glm.LayerByID(LastCellLayerID) <> -1) then  // go backwards until a selectable layer is found, select it and exit;  // if ((dx = -1) or (dy = -1))
+        for i := glm.LayerByID(LastCellLayerID)+dx+n*dy downto 0 do
+         if glm.Layers[i].SelectableInDialog then
+         begin
+           //LayerIdx := i;
+           self.DeselectAll;
+           self.SelectLayer(glm.Layers[i].LayerID);
+           self.LayersChangedNotification(self);
+           exit;
+         end;
+    end; // if not multiselect
+
+  end;
+
+
+begin
+  glm := self.RemoteGLM as TGraphicLayerManager;
+  n := buffer.Width div a; // xtiles = buffer.width div a;
+  vKey := chr(key and $FF);
+
+   case vkey of
+     // maybe move ENTER and ESC to KeyUp?
+     #13: if okbutton.Enabled then okbuttonClick(self); // ENTER
+     #27: abortbuttonClick(self);      // ESC
+     #37: ChangeSingleSelection(-1,0); // <
+     #38: ChangeSingleSelection(0,-1); // ^
+     #39: ChangeSingleSelection(+1,0); // >
+     #40: ChangeSingleSelection(0,+1); // v
+   end;
+   
+end;
+
+
+
+function TLayerSelectDlg.SelectedLayersCount: integer;
+var
+  i: integer;
+  glm: TGraphicLayerManager;
+begin
+  glm := TGraphicLayerManager(self.RemoteGLM);
+  result := 0;
+  for i := 0 to length(glm.Layers)-1 do
+    if glm.Layers[i].IsSelectedInDialog then inc(result);
+end;
+
+
+
+procedure TLayerSelectDlg.abortbuttonMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  self.abortbuttonClick(self);
+end;
+
+
+
+procedure TLayerSelectDlg.okbuttonMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  self.okbuttonClick(self);
+
+end;
+
+
+
+procedure TLayerSelectDlg.DockTopClick(Sender: TObject);
+begin
+  DockMode := dm_top;
+  UpdateDockStyle(self);
+  SetBounds(self);
+end;
+
+
+
+procedure TLayerSelectDlg.DockLeftClick(Sender: TObject);
+begin
+  DockMode := dm_left;
+  UpdateDockStyle(self);
+  SetBounds(self);
+end;
+
+
+
+procedure TLayerSelectDlg.docktoright1Click(Sender: TObject);
+begin
+  DockMode := dm_right;
+  UpdateDockStyle(self);
+  SetBounds(self);
+end;
+
+
+
+procedure TLayerSelectDlg.docktobottom1Click(Sender: TObject);
+begin
+  DockMode := dm_bottom;
+  UpdateDockStyle(self);
+  SetBounds(self);
+end;
+
+
+
+procedure TLayerSelectDlg.centerwindow1Click(Sender: TObject);
+begin
+  DockMode := dm_none;
+  UpdateDockStyle(self);
+  SetBounds(self);
+end;
+
+
+
+procedure TLayerSelectDlg.UpdateDockStyle(Sender: TObject);
+var i: integer;
+begin
+  for i := 0 to DockOptPopup.Items.Count -1 do
+    DockOptPopup.Items[i].Checked := false;
+
+  case DockMode of
+    dm_none  : self.centerwindow1.Checked := true;
+    dm_top   : self.docktotop.Checked     := true;
+    dm_left  : self.docktoleft2.Checked   := true;
+    dm_right : self.docktoright1.Checked  := true;
+    dm_bottom: self.docktobottom1.Checked := true;
+  end;
+end;
+
+
+
+procedure TLayerSelectDlg.DockOptPopupPopup(Sender: TObject);
+begin
+  UpdateDockStyle(self);
+end;
+
+
+
+procedure TLayerSelectDlg.SetBounds(Sender:TObject);
+var
+  IsVisible: Boolean;
+begin
+  IsVisible := self.Visible;
+  self.Visible := false;
+
+  case DockMode of
+    dm_none:
+      begin
+        ClientWidth := 700;
+        if panel1.Visible = false
+          then ClientHeight := 500 - Panel1.Height
+          else ClientHeight := 500;
+        Left := (Application.Mainform.ClientWidth  - self.Width ) div 2;
+        Top  := (Application.Mainform.ClientHeight - self.Height) div 2;
+      end;
+    dm_top:
+      begin
+        self.Width := application.MainForm.ClientWidth;
+        if panel1.Visible = false
+          then ClientHeight := 220 - Panel1.Height
+          else self.Height  := 220;
+        self.Left := 0;
+        self.Top := 0;
+      end;
+    dm_bottom:
+      begin
+        self.Width := application.MainForm.ClientWidth;
+        if panel1.Visible = false
+          then ClientHeight := 220 - Panel1.Height
+          else self.Height  := 220;
+        self.Left := 0;
+        self.Top := self.Parent.ClientHeight-self.Height;
+      end;
+    dm_Left:
+      begin
+        self.ClientWidth := 512;
+        self.Height := self.Parent.ClientHeight;
+        self.Left := 0;
+        self.Top := 0;
+      end;
+    dm_Right:
+      begin
+        self.ClientWidth := 512;
+        self.Height := self.Parent.ClientHeight;
+        self.Left := self.Parent.ClientWidth -self.Width;
+        self.Top := 0;
+      end;
+  end;
+
+  if IsVisible then
+  begin
+    if DockMode = dm_none then
+      self.BorderStyle := bsToolWindow
+     else
+      self.BorderStyle := bsNone;
+    self.LayersChangedNotification(self);
+  end;
+  
+  buffer.Canvas.Brush.Color := $E0E0E0;
+  buffer.Canvas.Brush.Style := bsSolid;
+  buffer.Width := self.ClientWidth;
+  if panel1.Visible
+    then buffer.Height := self.ClientHeight - Panel1.Height
+    else buffer.Height := self.ClientHeight;
+
+  if IsVisible then
+  begin
+    self.LayersChangedNotification(self);
+  end;
+
+  self.Visible := IsVisible;
+end;
+
+
+
+procedure TLayerSelectDlg.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+{ case char(Key and $FF) of
+   #13: if okbutton.Enabled then okbuttonClick(self); // ENTER
+   #27: abortbuttonClick(self);      // ESC
+ end;}
+end;
+
+
+
+
+procedure TLayerSelectDlg.Panel1MouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  pt: TPoint;
+begin
+  if  (mbRight = Button) and
+      not (ssCtrl in Shift) and
+      panel1.Visible then
+  begin
+    windows.GetCursorPos(pt);
+    DockOptPopup.Popup(pt.X - 16, pt.Y);
+  end;
+end;
+
+
+
+procedure TLayerSelectDlg.LayerCaptionLabelDblClick(Sender: TObject);
+var
+  dlg : TMultiFunctionalInputDialog;
+  s:string;
+  CurrentLayerIndex: longint;
+begin
+  LayerCaptionLabel.Enabled := FALSE;
+
+  CurrentLayerIndex := (RemoteGLM as TGraphicLayerManager).LayerByID(LastClickedIconLayerID);
+
+  if CurrentLayerIndex <> -1 then
+  begin
+    dlg := TMultiFunctionalInputDialog.Create;
+    dlg.frm.Caption := 'Change Layer name';
+    dlg.AddInputField('layer name' ,@s,'string','','',
+      (RemoteGLM as TGraphicLayerManager).Layers[CurrentLayerIndex].LayerCaption);
+    if dlg.Execute then
+    begin
+      (RemoteGLM as TGraphicLayerManager).Layers[CurrentLayerIndex].LayerCaption := s;
+      SetLastClickedIconLayerID(LastClickedIconLayerID); // update info
+    end;
+    dlg.Destroy;
+  end;
+
+  LayerCaptionLabel.Enabled := TRUE;
+end;
+
+
+
+procedure TLayerSelectDlg.SetLastClickedIconLayerID(newLayerID: longint);
+var
+  glm: TGraphicLayerManager;
+  LayerIdx: longint;
+begin
+  glm := (RemoteGLM as TGraphicLayerManager);
+  if not assigned(glm) then exit;
+  LayerIdx := glm.LayerByID(newLayerID);
+  if LayerIdx = -1 then
+  begin
+    LayerCaptionLabel.Caption := '';
+    LayerInfoLabel.Caption := '';
+    exit;
+  end;
+
+  fLastClickedIconLayerID := newLayerID;
+
+  LayerCaptionLabel.Caption := 'Caption: "'+glm.Layers[LayerIdx].LayerCaption+'"';
+  LayerInfoLabel.Caption    := 'Size: '+IntToStr(glm.Layers[LayerIdx].data.Width) + ' x ' +
+                                        IntToStr(glm.Layers[LayerIdx].data.Height) + '  px';
+end;
+
+
+
+end.

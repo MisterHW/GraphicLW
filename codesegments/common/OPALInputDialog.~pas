@@ -1,0 +1,542 @@
+unit OPALInputDialog;
+
+interface
+  uses
+    windows,Messages,forms,
+    classes, graphics, extctrls, controls, ComCtrls,
+    stdctrls,sysutils,
+    Spin,
+    dialogs;
+
+  type TInputField= Record
+    cap: TLabel;
+    valuefield: TComponent;
+    miscfields: array of TObject; // optional
+    inputtype, min, max, preset: string;
+    height: integer;
+    data: pointer;
+  end;
+
+  type TMulipleOut = array[0..15] of Pointer;
+
+  type TOPAL_Multifunctional_InputDialog=class(TObject)
+     private
+        InputFields: Array of TInputField;
+        isdone, success: boolean;
+
+        function  TopOffest: integer;
+        procedure OnInfoClick(sender:TObject);
+        procedure BuildOutputData(Sender:TObject);
+        procedure OnAbort(Sender:TObject);
+        procedure DisposeComponents;
+        function  GetDialogWidth: integer;
+        procedure SetDialogWidth(val: integer);
+        procedure OnSaveClick(Sender:TObject);
+        procedure OnTrackbarChange(Sender:TObject);
+     public
+        frm: TForm;
+        okbutton, abortbutton: TButton;
+        property Width: integer read GetDialogWidth write SetDialogWidth;
+        constructor Create;
+        destructor  Destroy; override;
+
+        function    Execute: Boolean;
+        procedure   AddInputField(caption: string; value: Pointer; InputType: string; Min: string =''; max: string='';preset: string='');
+  end;
+
+implementation
+
+
+procedure SplitAndInsert(itemstr: string; separator: char; list: TStrings);
+begin
+    if itemstr='' then exit;
+    while pos(separator, itemstr)>0 do
+    begin
+      list.Add(copy(itemstr,1,pos(separator, itemstr)-1));
+      itemstr := copy(itemstr,pos(separator, itemstr)+1,length(itemstr)-pos(separator, itemstr));
+    end;
+    list.Add(itemstr);
+end;
+
+procedure CenterToParentForm(child, parent:THandle); stdcall;
+  var r,c: TRect;
+  var w,h: integer;
+begin
+    windows.GetClientRect(parent,r);
+    windows.GetWindowRect(child,c);
+    w := c.Right-c.Left;
+    h := c.Bottom-c.Top;
+    windows.SetWindowPos(child,0,(r.Right-w) div 2,(r.Bottom-h) div 2,w,h,0);
+end;
+
+function QuotientstringToFloat(s: string): Extended;
+  var
+    tracked: array of string;
+    buf: string;
+    i,a,b,c: integer;
+
+    procedure addtotracked;
+    begin
+      setlength(tracked,length(tracked)+1);
+      tracked[high(tracked)] := buf;
+      buf := '';
+    end;
+begin
+    result :=StrToFloatDef(s,-1);
+    if result <> -1 then exit;
+
+    buf := '';
+    s := s+ ' ';
+    for i := 1 to length(s) do
+    begin
+      if (s[i] >='0') and (s[i] <= '9')
+        then buf := buf + s[i]
+        else
+          begin
+            if buf <>'' then addtotracked;
+          end;
+    end;
+
+    Case length(tracked) of
+      1: result := StrToIntDef(tracked[0],-1);
+      2: begin
+           b := StrToIntDef(tracked[0],-1);
+           c := StrToIntDef(tracked[1],-1);
+           if c = 0 then result := -1  // divide by zero
+                    else result := b/c;
+         end;
+      3: begin
+           a := StrToIntDef(tracked[0], 0);
+           b := StrToIntDef(tracked[1],-1);
+           c := StrToIntDef(tracked[2],-1);
+           if c = 0 then result := -1  // divide by zero
+                    else result := a + b/c;
+         end;
+      else result := -1;
+    end;
+end;
+
+
+
+  constructor TOPAL_Multifunctional_InputDialog.Create;
+  begin
+    // basic dialog gui implementation
+    isdone:= false;
+    frm := TFOrm.Create(nil);
+    frm.BorderStyle := bssingle;
+    frm.BorderIcons := [biSystemMenu];
+    //windows.SetParent(frm.Handle,guiglobals.GUIMainFormHandle);
+    frm.Width := 400;
+    frm.FormStyle := fsStayOnTop;
+
+    okbutton := TButton.Create(frm);
+    okbutton.Parent := frm;
+    okbutton.Left := frm.ClientWidth -4-okbutton.Width;
+    okbutton.Caption := 'proceed';
+    okbutton.OnClick := BuildOutputData;
+
+    abortbutton := TButton.Create(frm);
+    abortbutton.Parent := frm;
+    abortbutton.Left := frm.ClientWidth -4-okbutton.Width-abortbutton.Width-16;
+    abortbutton.Caption := 'abort';
+    abortbutton.OnClick := OnAbort;
+    abortbutton.Default := true;
+  end;
+
+
+
+  destructor TOPAL_Multifunctional_InputDialog.Destroy;
+  begin
+    inherited;
+  end;
+
+  function TOPAL_Multifunctional_InputDialog.Execute: Boolean;
+  var
+    msg:Tmsg;
+    ret: integer;
+  begin
+    result := false;
+    success := false;
+
+    if length(inputfields)=0 then
+    begin
+      Application.MessageBox(
+        PChar('Cannot build an empty dialog.'#13#10'This may be due to missing implementation.'),
+        PChar('MultifunctionalInputDialog execution error'),
+        MB_ICONCRITICAL or MB_OK);
+      exit;
+    end;
+
+    frm.ClientHeight := self.TopOffest + InputFields[length(inputfields)-1].height+48;
+    CenterToParentForm(frm.Handle,Application.MainForm.Handle);
+    okbutton.Top := frm.ClientHeight -4-okbutton.Height;
+    abortbutton.Top := okbutton.Top;
+    frm.Show;
+
+    repeat
+      ret := integer(GetMessage(msg,0,0,0));
+
+      if (ret <> 0) then
+      begin
+        TranslateMessage(msg);
+        DispatchMessage(msg);
+      end
+      else
+      begin
+        application.Terminate;
+        exit;
+      end;
+
+      if not IsWindowVisible(frm.Handle) then break;
+    until isdone;
+
+    self.DisposeComponents;
+    result := success;
+  end;
+
+  function TOPAL_Multifunctional_InputDialog.TopOffest: integer;
+  var i: integer;
+  begin
+    result := 0;
+    for i := 0 to length(InputFields)-2 do
+      result := result + InputFields[i].height;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.AddInputField(caption: string; value: Pointer; InputType: string; Min: string =''; max: string='';preset: string='');
+  var
+    cid: integer;
+    //nincp: TNoteInputCmp;
+    pancp: TPAnel;
+    //mrkcp: TMarkerCmp;
+    //hstcp: THistogramCmp;
+  const
+    xalign = 128;
+    procedure MakeField;
+    begin
+      setlength(Inputfields,length(Inputfields)+1);
+      cid := length(InputFields)-1;
+
+      InputFields[cid].height := 32;
+      InputFields[cid].preset := preset;
+      InputFields[cid].min := min;
+      InputFields[cid].max := max;
+      InputFields[cid].inputtype := inputtype;
+      InputFields[cid].data := value;
+
+      if InputType ='numeric' then InputFields[cid].height := 22;
+      if InputType ='keys' then InputFields[cid].height := 48;
+      if InputType ='quotient' then InputFields[cid].height := 22;
+      if InputType ='string' then InputFields[cid].height := 22;
+      if InputType ='static' then InputFields[cid].height := 22;
+      if InputType ='info' then InputFields[cid].height := 32;
+      if InputType ='combo' then InputFields[cid].height := 22;
+      if InputType ='staticpart' then InputFields[cid].height := 104;
+      if InputType ='save' then InputFields[cid].height := 22;
+      if InputType ='histogram' then InputFields[cid].height := 258;
+      if InputType ='trackbar' then InputFields[cid].height := 64;
+
+      InputFields[cid].cap := TLabel.Create(frm);
+      InputFields[cid].cap.Parent := frm;
+      InputFields[cid].cap.Caption := caption;
+      InputFields[cid].cap.Top := TopOffest + 4;
+      InputFields[cid].cap.Left := 4;
+
+      if (InputType ='numeric') or
+         (InputType ='string' ) then
+      begin
+        InputFields[cid].valuefield := TEdit.Create(frm);
+        with (InputFields[cid].valuefield as TEdit)do
+        begin
+          parent := frm;
+          width:= 128;
+          text := preset;
+          left := frm.ClientWidth -4 - width;
+          top := TopOffest + 4;
+        end;
+      end;
+
+      if InputType ='quotient' then
+      begin
+        InputFields[cid].valuefield := TEdit.Create(frm);
+        with (InputFields[cid].valuefield as TEdit)do
+        begin
+          parent := frm;
+          width:= 128;
+          text := preset;
+          left := frm.ClientWidth -4- width;
+          top := TopOffest + 4;
+        end;
+      end;
+
+      if InputType ='static' then
+      begin
+        InputFields[cid].valuefield := TEdit.Create(frm);
+        with (InputFields[cid].valuefield as TEdit)do
+        begin
+          parent := frm;
+          width:= frm.ClientWidth-8 - xalign;
+          text := preset;
+          left := xalign;
+          readonly := true;
+          borderstyle := bsnone;
+          color := frm.Color;
+          top := TopOffest + 6;
+        end;
+      end;
+
+      if InputType ='info' then
+      begin
+        InputFields[cid].data := TPanel.Create(frm);
+        pancp := InputFields[cid].data;
+        pancp.Width := frm.ClientWidth+1;
+        pancp.Top := TopOffest;
+        pancp.Color := $E0E0E0;
+        pancp.Bevelinner := bvnone;
+        pancp.Height := InputFields[cid].height;
+        pancp.Parent := frm;
+
+        InputFields[cid].cap.Top := 8;
+        InputFields[cid].cap.Font.Style := [fsbold];
+        inputfields[cid].cap.Parent := pancp;
+        InputFields[cid].valuefield := TLabel.Create(pancp);
+
+        with (InputFields[cid].valuefield as TLabel)do
+        begin
+          parent := pancp;
+          hint := preset;
+          caption := '[ ? ]';
+          Font.Style := [fsbold];
+          left := frm.ClientWidth -4- width;
+          top := TopOffest + 6;
+          Onclick := self.OnInfoClick;
+          if preset='' then visible := false;
+        end;
+      end;
+
+      if InputType ='combo' then
+      begin
+        InputFields[cid].valuefield := TCombobox.Create(frm);
+        with (InputFields[cid].valuefield as TCombobox) do
+        begin
+          parent := frm;
+          width:= 128;
+          SplitAndInsert(preset,'|',items);
+          //if items.Count >0 then text := items[0];
+          text := min;
+          left := frm.ClientWidth -4 -width;
+          top := TopOffest +4;
+        end;
+      end;
+
+      if InputType ='spin' then
+      begin
+        InputFields[cid].valuefield := TSpinEdit.Create(frm);
+        with (InputFields[cid].valuefield as TSpinEdit) do
+        begin
+          parent := frm;
+          width:= 128;
+          left := frm.ClientWidth -4 -width;
+          top := TopOffest +4;
+          value := StrToIntDef(preset,0);
+          MaxValue := StrToIntDef(max,0);
+          MinValue := StrToIntDef(min,0);
+        end;
+      end;
+
+      if InputType ='save' then
+      begin
+        setlength(InputFields[cid].miscfields,2);
+
+        InputFields[cid].miscfields[0] := TEdit.Create(frm);
+        with (InputFields[cid].miscfields[0] as TEdit) do
+        begin
+          parent := frm;
+          width:= frm.ClientWidth-8 - xalign -20;
+          text := preset;
+          left := xalign;
+          top := TopOffest +4;
+        end;
+
+        InputFields[cid].miscfields[1] := Tbutton.Create(frm);
+        with (InputFields[cid].miscfields[1] as TButton) do
+        begin
+          parent := frm;
+          width:= 22;
+          height:=22;
+          caption := '...';
+          left := frm.ClientWidth -4 -width;
+          top := TopOffest +4;
+          hint := inttostr(integer(@InputFields[cid]));
+          onclick := self.OnSaveClick;
+        end;
+      end;
+
+      if InputType ='trackbar' then
+      begin
+        setlength(InputFields[cid].miscfields,2);
+
+        InputFields[cid].miscfields[0] := TEdit.Create(frm);
+        with (InputFields[cid].miscfields[0] as TEdit) do
+        begin
+          parent := frm;
+          width:= 48;
+          text := preset;
+          left := xalign;
+          top := TopOffest +4;
+        end;
+
+        InputFields[cid].miscfields[1] := TTrackbar.Create(frm);
+        with (InputFields[cid].miscfields[1] as TTrackbar) do
+        begin
+          parent := frm;
+          width:= frm.ClientWidth - xalign - 48;
+          left := xalign+48;
+          top := TopOffest +4;
+          position := StrToIntDef(preset,0);
+          hint := inttostr(integer(@InputFields[cid]));
+          OnChange := self.OnTrackbarChange;
+        end;
+        (InputFields[cid].miscfields[1] as TTrackbar).max := StrToIntDef(max,0);
+        (InputFields[cid].miscfields[1] as TTrackbar).min := StrToIntDef(min,0);
+      end;
+   end;
+
+  begin
+    MakeField;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.OnInfoClick(sender:TObject);
+  begin
+    self.frm.Hide;
+    //msghandler.throwInformation(StrToOpalMessage(frm.caption,(sender as TLabel).Hint));
+    Application.MessageBox(
+        PCHar((sender as TLabel).Hint),
+        PChar(frm.caption),
+        MB_ICONINFORMATION or MB_OK);
+    self.frm.Show;
+    frm.SetFocus;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.BuildOutputData(Sender:TObject);
+  var
+    pinteger: ^integer;
+    pstring: ^string;
+//    pmultiple: ^TMulipleOut;
+    i: integer;
+    //nincp:TNoteInputCmp;
+    //mrkcp:TMarkerCmp;
+  begin
+    self.isdone := true;
+    self.success := true;
+    // build output
+    for i := 0 to length(InputFields)-1 do
+    begin
+      if (InputFields[i].inputtype = 'string') or
+         (InputFields[i].inputtype = 'quotient') then
+      begin
+        pstring := InputFields[i].data;
+        pstring^ := (InputFields[i].valuefield as TEdit).Text;
+      end;
+
+      if InputFields[i].inputtype = 'combo' then
+      begin
+        pstring := InputFields[i].data;
+        pstring^ := (InputFields[i].valuefield as TCombobox).Text;
+      end;
+
+      if InputFields[i].inputtype = 'numeric' then
+      begin
+        pinteger := InputFields[i].data;
+        pinteger^ := strtointdef((InputFields[i].valuefield as TEdit).Text,0);
+      end;
+
+      {if InputFields[i].inputtype = 'keys' then
+      begin
+        nincp := Pointer(inputfields[i].valuefield);
+        pinteger := InputFields[i].data;
+        pinteger^ := nincp.value;
+      end;}
+
+      if InputFields[i].inputtype = 'spin' then
+      begin
+        pinteger := InputFields[i].data;
+        pinteger^ := (InputFields[i].valuefield as TSpinEdit).Value;
+      end;
+
+      {if InputFields[i].inputtype = 'staticpart' then
+      begin
+        pmultiple := InputFields[i].data;
+        mrkcp := Pointer(InputFields[i].valuefield);
+        pinteger  := pmultiple^[0];
+        pinteger^ := mrkcp.LeftMarker;
+        pinteger  := pmultiple^[1];
+        pinteger^ := mrkcp.RightMarker;
+      end;}
+
+      if InputFields[i].inputtype = 'save' then
+      begin
+        pstring := InputFields[i].data;
+        pstring^ := (InputFields[i].miscfields[0] as TEdit).Text;
+      end;
+
+    end;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.OnAbort(Sender:TObject);
+  begin
+    self.isdone := true;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.OnSaveClick(Sender:TObject);
+  var
+    sd: TSavedialog;
+    params: ^TInputField;
+    ed: TEdit;
+  begin
+    params := Pointer(strtoint((sender as TButton).Hint));
+    sd := TSavedialog.Create(frm);
+    sd.Filter := params^.min;
+    sd.DefaultExt := params^.max; 
+    ed := Pointer(params^.miscfields[0]);
+    sd.InitialDir := ExtractFilePath(ed.Text);
+    sd.FileName := ExtractFileName(ed.text);
+    if sd.Execute then ed.Text := sd.FileName;
+    sd.Free;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.DisposeComponents;
+  var i,k: integer;
+  begin
+     frm.Hide;
+     for i := 0 to length(InputFields)-1 do
+     begin
+       InputFields[i].cap.Free;
+       if assigned(InputFields[i].valuefield) then InputFields[i].valuefield.Free;
+       for k := 0 to length(InputFields[i].miscfields)-1 do
+         InputFields[i].miscfields[k].Free;
+     end;
+     setlength(InputFields,0);
+     okbutton.Free;
+     abortbutton.Free; 
+     frm.Free;
+  end;
+
+  function  TOPAL_Multifunctional_InputDialog.GetDialogWidth: integer;
+  begin
+    result := self.frm.Width;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.SetDialogWidth(val: integer);
+  begin
+    self.frm.Width := val;
+    okbutton.Left := frm.ClientWidth -4-okbutton.Width;
+    abortbutton.Left := frm.ClientWidth -4-okbutton.Width-abortbutton.Width-16;
+  end;
+
+  procedure TOPAL_Multifunctional_InputDialog.OnTrackbarChange(Sender:TObject);
+  begin
+  end;
+
+
+
+end.

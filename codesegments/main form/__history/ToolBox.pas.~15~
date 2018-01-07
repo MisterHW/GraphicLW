@@ -1,0 +1,718 @@
+////////////////////////////////////////////////////////////////////////////////////////
+//
+// ToolBox
+//            is a general purpose tool window that provides direct access to an
+// intuitively structured set of tools. It blends the following features to
+// improve the workflow and reduce complexity:
+//
+// 1. menu functionality: the toggle buttons function as main menu entries.
+//    Unlike the common window menu, the selected submenu button latches and
+//    the submenu can be managed as a tab
+//
+// 2. as with toolbars, all main tool groups (=tabs) have a symbolic representation
+//    and stay at their place so the user can retrieve them with ease
+//
+// 3. tool window containers into which tool windows can be dropped via drag&drop
+//    actions are often tabbed and cannot show multiple tools at a time, requiring
+//    another tool window container to be on the screen.
+//    a)  ToolBox allows the user to collapse unused tools of the same group while
+//        simultaneosly showing related tools of the same group
+//    b)  tool groups are managed and accessible via tabs. Only the selected groups are
+//        tabbed for further selection
+//
+// 4. the hybridisation of 'boxed' tools and boxes that have menu item characteristics
+//    (e.g. clicking a button contained within starts a defined action) merges access to
+//    simple 'boxed' tools and other functionality into one tabbed tool group, enabling
+//    the user to percieve different bits of functionality as homogenous ensemble.
+//
+//
+// usage:
+//
+// create an instance ToolBoxForm of TToolBoxForm within the main application:
+// Application.CreateForm( TToolBoxForm , ToolBoxForm );
+//
+// use another form with a tab control to manage your 'boxed' tools (expressed as
+// TGroupBox objects) at design time then insert all GroupBox objects at you
+// application main form FormActivate event into their respective
+// ToolBox Tabs (pages) using
+//
+// ToolBoxForm.InsetGroupBox( YourGroupBoxO1 , PageIndex );
+// where PageIndex is within 0..15 .
+//
+// Modify the icons within the imageList objects to change the button and tab icon appearance.
+// ImageList1 entries are the icons for the toggle buttons, each button has the the index of
+// a page stored in its tag property. ImageList1[2*tag] and ImageList1[2*tag+1] are the state
+// images for the tag-th toggle button. Start-up images for the toggle buttons have to be
+// updated manually for each button and come pre-set to avoid empty buttons due to incomplete
+// imagelist icons. The button hints are displayed in the statusbar on mouseover.
+// once set up properly, a tool group page can be activaed by assigning 'ToolToggleEvent' to
+// the OnClick event of the corresponding toggle button.
+//
+//
+//
+// Change History:
+// -- 2011-05-17 first implementation
+//
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////
+
+unit ToolBox;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ComCtrls, ExtCtrls, Buttons, ImgList, StdCtrls, Menus, Math, NotificationNode;
+
+type
+  TToolBoxForm = class(TForm)
+    SetButtonPanel: TPanel;
+    PageControl1: TPageControl;
+    TabSheet2: TTabSheet;
+    ToolToggle11: TSpeedButton;
+    ToolToggle12: TSpeedButton;
+    ToolToggle13: TSpeedButton;
+    ToolToggle21: TSpeedButton;
+    ToolToggle22: TSpeedButton;
+    ToolToggle23: TSpeedButton;
+    ToolToggle14: TSpeedButton;
+    ToolToggle15: TSpeedButton;
+    ToolToggle16: TSpeedButton;
+    ToolToggle26: TSpeedButton;
+    ToolToggle25: TSpeedButton;
+    ToolToggle24: TSpeedButton;
+    ToolToggle17: TSpeedButton;
+    ToolToggle18: TSpeedButton;
+    ToolToggle28: TSpeedButton;
+    ToolToggle27: TSpeedButton;
+    TabSheet3: TTabSheet;
+    TabSheet4: TTabSheet;
+    ImageList1: TImageList;
+    StatusBar: TStatusBar;
+    PopupMenu1: TPopupMenu;
+    CloseThisTab1: TMenuItem;
+    CloseALLTabs1: TMenuItem;
+    TabSheet1: TTabSheet;
+    ScrollBox1: TScrollBox;
+    ScrollBox2: TScrollBox;
+    ScrollBox3: TScrollBox;
+    ScrollBox4: TScrollBox;
+    TabSheet5: TTabSheet;
+    TabSheet6: TTabSheet;
+    TabSheet7: TTabSheet;
+    TabSheet8: TTabSheet;
+    TabSheet9: TTabSheet;
+    TabSheet10: TTabSheet;
+    TabSheet11: TTabSheet;
+    TabSheet12: TTabSheet;
+    TabSheet13: TTabSheet;
+    TabSheet14: TTabSheet;
+    TabSheet15: TTabSheet;
+    TabSheet16: TTabSheet;
+    ScrollBox5: TScrollBox;
+    ScrollBox6: TScrollBox;
+    ScrollBox7: TScrollBox;
+    ScrollBox8: TScrollBox;
+    ScrollBox9: TScrollBox;
+    ScrollBox10: TScrollBox;
+    ScrollBox11: TScrollBox;
+    ScrollBox12: TScrollBox;
+    ScrollBox13: TScrollBox;
+    ScrollBox14: TScrollBox;
+    ScrollBox15: TScrollBox;
+    ScrollBox16: TScrollBox;
+    N1: TMenuItem;
+    FitSize1: TMenuItem;
+    MaximizeSize1: TMenuItem;
+    procedure ToolToggleEvent(Sender: TObject);
+    procedure InitializeForFirstStart(Sender: TObject);
+    procedure ToolToggleMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure CloseThisTab1Click(Sender: TObject);
+    procedure CloseALLTabs1Click(Sender: TObject);
+    procedure FoldableGroupBoxDblClick(Sender: TObject);
+    procedure FormCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
+    procedure FitSize1Click(Sender: TObject);
+    procedure StatusBarDblClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure StatusBarMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure FormDestroy(Sender: TObject);
+    procedure MaximizeSize1Click(Sender: TObject);
+    procedure StatusBarMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormActivate(Sender: TObject);
+    procedure PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
+  private
+    ActivePageIndexAtBeginTabChanges: longint;
+    OverrideResizeRestrictions : Boolean;
+    NotShownBefore: Boolean;
+
+    procedure UpdateToolBoxSetButtonIcons(PageIndex: longint; AssociatedButton: TSpeedButton = nil);
+    procedure BeginTabChanges;
+    procedure FinishTabChanges;
+    procedure SetStatusToHintOfSenderM(Sender: TObject; Shift: TShiftState; X, Y: Integer); // as TMouseMoveEvent
+  public
+    OnRequestToolBoxFill : TNotifyEvent;
+    OnShowEvent : TNotificationNode;
+
+    procedure InsetGroupBox(  NewObject: TGroupBox; // group box to be inserted. Aligment will be changed to AlTop.
+                              PageIndex: longint;   // 0 .. PageControl.PageCount-1
+                              CanBeCollapsed: Boolean = true);
+    procedure SetStatusToHintOfSender(Sender: TObject); overload; // as TNotifyEvent
+  end;
+
+var
+  ToolBoxForm: TToolBoxForm;
+
+const
+  DefaultCollapsedBoxHeight = 16;
+
+
+
+
+
+implementation
+
+{$R *.dfm}
+
+
+
+
+
+procedure TToolBoxForm.ToolToggleEvent(Sender: TObject);
+var
+  ThisPage: TTabSheet;
+
+  function TabSheetByTag(Tag: longint): TTabSheet;
+  var i : integer;
+  begin
+    result := nil;
+    for i := 0 to PageControl1.PageCount - 1 do
+    begin
+      if PageControl1.Pages[i].Tag = Tag then
+      begin
+        result := PageControl1.Pages[i];
+        break;
+      end;
+    end;
+  end;
+
+begin
+  // The SpeedButton.Tag property is used to signal which Page Index it toggles
+  // ToolToggleEvent is the default handler for all Tab Toggle Buttons in the ToolBox
+
+  if not (Sender is TSpeedButton) then exit;
+
+  self.BeginTabChanges;
+
+  //if ((Sender as TSpeedButton).Tag < 0) or (PageControl1.PageCount-1 < (Sender as TSpeedButton).Tag) then
+  //  MessageBox(0,PChar('Invalid tab page index '+IntToStr((Sender as TSpeedButton).Tag)),'ToolBoxForm.ToolToggleEvent',MB_OK);
+
+  if (Sender as TSpeedButton).Tag > -1 then // denote -1 as a deactivated button
+  begin
+    if PageControl1.PageCount-1 >= (Sender as TSpeedButton).Tag then
+    begin
+      ThisPage := TabSheetByTag((Sender as TSpeedButton).Tag);
+
+      if assigned(ThisPage) then
+      begin
+
+        ThisPage.TabVisible := not ThisPage.TabVisible; // activate/deactivate page
+
+        if ThisPage.TabVisible then
+           PageControl1.ActivePageIndex := ThisPage.PageIndex; // not sure if this is too confusing  (change focus may distract from train of thought)...
+
+        UpdateToolBoxSetButtonIcons(
+           ThisPage.PageIndex,
+           (Sender as TSpeedButton));
+      end
+      else
+      begin
+        MessageBox(0,PChar('Invalid tab page index '+IntToStr((Sender as TSpeedButton).Tag)),'ToolBoxForm.ToolToggleEvent',MB_OK);
+      end;
+
+    end;
+  end;
+
+
+  self.FinishTabChanges; // update form appearance (resize) if no tabs are open or a new one is activated
+end;
+
+
+
+procedure TToolBoxForm.InitializeForFirstStart(Sender: TObject);
+var
+  i: integer;
+  imageidx: integer;
+  button: TSpeedButton;
+begin
+  OverrideResizeRestrictions := true;
+
+  // start with all tabs hidden (perhaps change this to show a startup tab if defined)
+  for i := 0 to PageControl1.PageCount -1 do
+    PageControl1.Pages[i].TabVisible := false;
+
+  self.Tag := self.Height; // store height in tag variable to restore form later
+
+  // don't collapse to a smaller size than Buttonpanel + statusbar = clientheight
+  self.Constraints.MinHeight :=   // calculate minimum height when pagecontrol is collapsed
+      self.SetButtonPanel.Top +
+      self.SetButtonPanel.Height +
+      0 +
+      self.StatusBar.Height +
+      self.Height - self.ClientHeight;
+  self.Constraints.MaxHeight := 10000;
+  self.Height := self.Constraints.MinHeight;
+
+  // initialize button glyphs
+  for i := 0 to SetButtonPanel.ControlCount-1 do
+  begin
+
+    if SetButtonPanel.Controls[i] is TSpeedButton then
+    begin
+        button := (SetButtonPanel.Controls[i] as TSpeedButton);
+        imageidx := Button.Tag * 2; // preset to off-state image
+
+        if (imageidx >= 0) and
+           (imageidx < ImageList1.Count) then
+        begin
+
+            if button.Glyph.Height * button.Glyph.Width = 0 then
+            begin
+              Button.Glyph.PixelFormat := pf32bit;
+              Button.Glyph.Width       := ImageList1.Width;
+              Button.Glyph.Height      := ImageList1.Height;
+            end; // if
+
+            ImageList1.Draw(Button.Glyph.Canvas,0,0,imageidx);
+            Button.Glyph.Modified := true;
+
+        end; // if imageidx in range
+
+    end; // if is TSpeedButton
+
+  end; // for
+
+
+  // initialize pagecontrol glyphs
+  PageControl1.TabHeight := ImageList1.Height+2;
+  pagecontrol1.TabWidth  := ImageList1.Width +4;
+  PageControl1.Images := ImageList1; // same list for buttons and page tabs, tabs get the "engaged" icons 2n+1
+  for i := 0 to PageControl1.PageCount-1 do
+  begin
+    PageControl1.Pages[i].ImageIndex := i*2 + 1;
+    PageControl1.Pages[i].Tag := PageControl1.Pages[i].PageIndex;
+  end; // for
+
+
+
+  OverrideResizeRestrictions := false;
+end;
+
+
+
+procedure TToolBoxForm.ToolToggleMouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+begin
+ if not (Sender is TSpeedButton) then exit;
+
+ StatusBar.Panels[0].Text := (Sender as TSpeedbutton).Hint; // show hint in status bar
+end;
+
+
+
+procedure TToolBoxForm.PageControl1DragDrop(Sender, Source: TObject; X,
+  Y: Integer);
+const
+   TCM_GETITEMRECT = $130A;
+var
+   TabRect: TRect;
+   j: Integer;
+begin
+   if (Sender is TPageControl) then
+   for j := 0 to PageControl1.PageCount - 1 do
+   begin
+     PageControl1.Perform(TCM_GETITEMRECT, j, LParam(@TabRect)) ;
+     if PtInRect(TabRect, Point(X, Y)) then
+     begin
+       if PageControl1.ActivePage.PageIndex <> j then
+         PageControl1.ActivePage.PageIndex := j;
+       Exit;
+     end;
+   end;
+end;
+
+
+
+procedure TToolBoxForm.PageControl1DragOver(Sender, Source: TObject; X,
+  Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+   if (Sender is TPageControl) then Accept := True;
+end;
+
+
+
+procedure TToolBoxForm.PageControl1MouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  curpos: TPoint;
+begin
+  Windows.GetCursorPos(curpos);
+  if mbRight = Button then
+  begin
+    if Windows.WindowFromPoint(curpos) = PageControl1.Handle then
+      PopupMenu1.Popup(curpos.X, curpos.Y); // show popup menu for pagecontrol functionality
+  end
+  else
+  begin
+    PageControl1.BeginDrag(False);
+  end;
+end;
+
+
+
+procedure TToolBoxForm.CloseThisTab1Click(Sender: TObject); // menu action: close tab of activepageindex
+var
+  tmpindex: longint;
+begin
+  self.BeginTabChanges;
+  tmpindex := PageControl1.ActivePageIndex;
+  PageControl1.Pages[PageControl1.ActivePageIndex].TabVisible := False;
+  UpdateToolBoxSetButtonIcons(tmpindex,nil);
+  self.FinishTabChanges;
+end;
+
+
+
+procedure TToolBoxForm.CloseALLTabs1Click(Sender: TObject); // close all tabs, collapse form
+var
+  i: integer;
+begin
+  self.BeginTabChanges;
+  for i := 0 to PageControl1.PageCount -1 do
+    PageControl1.Pages[i].TabVisible := false;
+  UpdateToolBoxSetButtonIcons(-1,nil);
+  self.FinishTabChanges;
+end;
+
+
+
+procedure TToolBoxForm.UpdateToolBoxSetButtonIcons(PageIndex: longint; AssociatedButton: TSpeedButton = nil); // updates the Toggle Button icons in the Tool Box
+
+  procedure UpdateSingleSetButtonIcon;
+  begin
+     if PageControl1.PageCount -1 < PageIndex then exit;
+
+     if PageControl1.Pages[PageIndex].TabVisible then // draw ImageList[2*tag] else draw Imagelist[2*tag+1] image
+     begin
+         if ImageList1.Count -1 >= PageIndex*2+1 then
+         begin
+           ImageList1.Draw(
+              AssociatedButton.Glyph.Canvas,
+              0,0,
+              AssociatedButton.Tag*2+1);
+
+           AssociatedButton.Glyph.Modified := true; // update on screen
+           AssociatedButton.Repaint;
+         end;
+     end
+     else
+     begin
+         if ImageList1.Count -1 >= PageIndex*2 then
+         begin
+           ImageList1.Draw(
+              AssociatedButton.Glyph.Canvas,
+              0,0,
+              AssociatedButton.Tag*2);
+
+           AssociatedButton.Glyph.Modified := true; // update on screen
+           AssociatedButton.Repaint;
+         end;
+     end;
+  end;
+
+var
+  i: integer;
+begin
+
+  if (PageIndex > -1) and (AssociatedButton <> nil) then
+  begin
+    UpdateSingleSetButtonIcon;
+  end // PageIndex > -1
+  else
+  begin
+    if PageIndex = -1 then  // update all
+    begin
+      for i := 0 to self.SetButtonPanel.ControlCount -1 do
+      begin
+
+        if (SetButtonPanel.Controls[i] is TSpeedButton) then
+        begin
+          AssociatedButton := (SetButtonPanel.Controls[i] as TSpeedButton); // abuse variables in local namespace, they aren't used anyway
+          PageIndex := AssociatedButton.Tag;                                // and the embedded procedure doesn't need parameters
+          if AssociatedButton.Tag <> -1 then
+            UpdateSingleSetButtonIcon;
+        end; // if Speedbutton
+
+      end; // for
+    end  // if
+    else
+    begin // AssociatedButton is nil, PageIndex <> -1, find the button!
+      for i := 0 to self.SetButtonPanel.ControlCount -1 do
+      begin
+
+        if (SetButtonPanel.Controls[i] is TSpeedButton) then
+        begin
+          AssociatedButton := (SetButtonPanel.Controls[i] as TSpeedButton);
+          if AssociatedButton.Tag = PageIndex then
+            UpdateSingleSetButtonIcon;            // ok, we could break here but maybe somesone likes the idea of having several buttons do the same.. you never know - so cycle through all. /g
+        end; // if Speedbutton
+
+      end; // for
+    end;
+  end; // PageIndex = -1
+
+end;
+
+
+
+procedure TToolBoxForm.FoldableGroupBoxDblClick(Sender: TObject); // collapse / expand group box on double-click
+var
+  tmp: integer;
+  gbox: TGroupBox;
+begin
+  gbox := (Sender as TGroupBox);
+
+  if not (Sender is TGroupBox) then exit;
+
+  if gbox.Tag = 0 then gbox.tag := DefaultCollapsedBoxHeight; // default height when folded
+
+  tmp         := gbox.tag;
+  gbox.tag    := gbox.Height;
+  gbox.Height := tmp;
+  
+  Application.ProcessMessages;
+
+  if gbox.Parent is TScrollBox then
+    (gbox.Parent as TScrollBox).ScrollInView(gbox);
+end;
+
+
+
+procedure TToolBoxForm.BeginTabChanges;
+begin
+  OverrideResizeRestrictions       := true; // override CanResize restrictions
+                                            // that inhibit form expansion while PageControl is collapsed
+  ActivePageIndexAtBeginTabChanges := PageControl1.ActivePageIndex;
+end;
+
+
+
+procedure TToolBoxForm.FinishTabChanges;
+var
+  FormWasReduced: boolean;
+  tmp: longint;
+begin
+  FormWasReduced := ActivePageIndexAtBeginTabChanges = -1;
+
+  if ((PageControl1.ActivePageIndex <> -1) and     FormWasReduced) or  // if collapsing / expanding is required, do it
+      (PageControl1.ActivePageIndex  = -1) and not FormWasReduced then
+  begin
+    tmp := self.Height;
+    if assigned(Self.Parent)then
+      ToolBoxForm.Height := min(self.Tag, ToolBoxForm.Parent.ClientHeight- ToolBoxForm.Top)
+    else
+      ToolBoxForm.Height := self.Tag;
+    self.Tag := tmp;
+  end;
+  OverrideResizeRestrictions := false;
+end;
+
+
+
+procedure TToolBoxForm.FormActivate(Sender: TObject);
+var idx: longint;
+begin
+  for idx := 0 to PageControl1.PageCount - 1 do
+    PageControl1.Pages[idx].Caption := '';
+end;
+
+
+
+procedure TToolBoxForm.FormCanResize(Sender: TObject; var NewWidth,
+  NewHeight: Integer; var Resize: Boolean);
+begin
+  if not OverrideResizeRestrictions then
+    if (PageControl1.ActivePageIndex = - 1) and self.Visible then Resize := false;
+end;
+
+
+
+procedure TToolBoxForm.InsetGroupBox(NewObject: TGroupBox; PageIndex: longint; CanBeCollapsed: Boolean = true); // insert a group box into a ScrollBox
+var
+  i: integer;
+  Target : TWinControl;
+begin
+  if (PageIndex > -1) and (PageIndex <= PageControl1.PageCount-1) then
+  begin
+    Target := PageControl1.Pages[PageIndex];  // insert into the tabsheet if no better parent is available
+    for i := 0 to PageControl1.Pages[PageIndex].ControlCount -1 do
+      if PageControl1.Pages[PageIndex].Controls[i] is TScrollBox then
+      begin
+        Target := PageControl1.Pages[PageIndex].Controls[i] as TScrollBox; // a ScrollBox is found as a new parent, use it.
+        break;
+      end;
+
+    if assigned(NewObject.Parent) then
+      NewObject.Parent.RemoveControl(NewObject);
+    NewObject.Parent := Target; // insert  implies Target.InsertControl(NewObject)
+    NewObject.Align  := alTop;  // set alignment
+
+    if CanBeCollapsed then
+      NewObject.OnDblClick := FoldableGroupBoxDblClick;
+  end;
+end;
+
+
+
+
+
+
+procedure TToolBoxForm.MaximizeSize1Click(Sender: TObject);
+begin
+  if (PageControl1.ActivePageIndex = -1) then exit;
+  self.Height := self.Parent.ClientHeight-self.Top;
+end;
+
+procedure TToolBoxForm.FitSize1Click(Sender: TObject);
+var
+  newheight: longint;
+  ChildHeights, i: longint;
+  page: TTabSheet;
+  box: TScrollBox;
+
+begin
+  if (PageControl1.ActivePageIndex = -1) then exit;
+  ChildHeights := 0;
+  page := PageControl1.Pages[PageControl1.ActivePageIndex];
+
+  box := nil;
+  for i := 0 to  Page.ControlCount -1 do
+    if page.Controls[i] is TScrollBox then
+    begin
+      box := Page.Controls[i] as TScrollBox;
+      break;
+    end;
+
+  if not assigned(box) then exit;
+
+  for i := 0 to  box.ControlCount -1 do
+     ChildHeights := ChildHeights + box.Controls[i].Height+2;
+
+  newheight :=  (Self.Height - PageControl1.Height){top and bottom margin from form bounding box}
+              + (page.Height - page.ClientHeight){offset for page client area to begin}
+              + (page.Top){add the tab rect}
+              + (box.ClientHeight- box.Height + box.Top){ScrollBox margin}
+              + (ChildHeights+2){ sum of heights of inserted controls};
+
+
+  if assigned(self.Parent) then
+    newheight := min(self.Parent.ClientHeight-self.Top,newheight)
+  else
+    newheight := min(screen.Height-self.Top,newheight);
+
+  Self.Height := newheight;
+end;
+
+
+
+procedure TToolBoxForm.SetStatusToHintOfSenderM(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+begin
+
+end;
+
+
+
+procedure TToolBoxForm.StatusBarDblClick(Sender: TObject);
+begin
+  FitSize1Click(self);
+end;
+
+
+
+procedure TToolBoxForm.FormShow(Sender: TObject);
+begin
+  if NotShownBefore then  // moved from FormCreate to this event for being suspicious of causing issues within wine
+  begin
+    NotShownBefore := false;
+    if assigned(OnRequestToolBoxFill) then OnRequestToolBoxFill(self); // wine messes up the creation of the forms, so when
+                                                                       // we try to fill in the boxes while the tabs haven't been
+                                                                       // created, it's like hell on earth.
+    self.InitializeForFirstStart(self);
+  end;
+
+  OnShowEvent.SharedEvent(self); 
+end;
+
+
+
+procedure TToolBoxForm.FormCreate(Sender: TObject);
+begin
+  NotShownBefore := true;
+  OnShowEvent := TNotificationNode.Create;
+end;
+
+
+
+procedure TToolBoxForm.FormDestroy(Sender: TObject);
+begin
+  OnShowEvent.Destroy;
+end;
+
+
+
+procedure TToolBoxForm.SetStatusToHintOfSender(Sender: TObject);
+begin
+  if (Sender is TWinControl) then
+     StatusBar.Panels[0].Text := (Sender as TWinControl).Hint;
+end;
+
+
+
+procedure TToolBoxForm.StatusBarMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  curpos: TPoint;
+begin
+  Windows.GetCursorPos(curpos);
+  if mbRight = Button then
+    if PageControl1.ActivePageIndex <> -1 then
+      PopupMenu1.Popup(curpos.X, curpos.Y);
+end;
+
+
+
+procedure TToolBoxForm.StatusBarMouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if ((PageControl1.ActivePageIndex <> - 1) or (Sender <> StatusBar)) then
+  begin
+    if (Sender is TWinControl) then
+        StatusBar.Panels[0].Text := (Sender as TWinControl).Hint;
+    if (Sender is TGraphicControl) then
+        StatusBar.Panels[0].Text := (Sender as TGraphicControl).Hint;
+  end;
+end;
+
+
+end.
